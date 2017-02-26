@@ -1,0 +1,27 @@
+1 elements:
+foo
+2 elements:
+foo
+bar
+3 elements:
+foo
+bar
+baz
+4 elements:
+foo
+bar
+baz
+qux
+3 elements:
+foo
+bar
+baz
+2 elements:
+bar
+baz
+0 elements:
+1 elements:
+hello
+2 elements:
+hello
+world
