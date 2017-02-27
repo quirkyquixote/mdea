@@ -17,108 +17,95 @@ void mdea_error(wchar_t **error, wchar_t *msg, ...)
 	va_end(ap);
 }
 
-ssize_t mdea_escape(wchar_t *dst, size_t dlen, wchar_t *src, size_t slen, wchar_t **error)
+wchar_t *mdea_escape(const wchar_t *str, wchar_t **error)
 {
-	ssize_t ret = 0;
-	while (*src && slen) {
-		if (!dlen) {
-			mdea_error(error, L"Not enough space");
-			return -1;
+	size_t alloc = 0;
+	size_t size = 0;
+	wchar_t *buf = NULL;
+	for (;;) {
+		if (alloc == size) {
+			alloc = alloc ? 2 * alloc : 2;
+			buf = realloc(buf, alloc * sizeof(*buf));
 		}
-		if (*src != '\\') {
-			*dst = *src;
-			++src;
-			--slen;
+		if (*str != '\\') {
+			buf[size] = *str;
+			if (*str == 0)
+				break;
+			++str;
 		} else {
-			++src;
-			--slen;
-			if (!slen || *src == 0) {
+			++str;
+			if (*str == 0) {
+				free(buf);
 				mdea_error(error, L"Unexpected end of string");
-				return -1;
+				return NULL;
 			}
-			if (*src == '0') {
-				*dst = 0;
-				++src;
-				--slen;
-			} else if (*src == '\'') {
-				*dst = '\'';
-				++src;
-				--slen;
-			} else if (*src == '"') {
-				*dst = '"';
-				++src;
-				--slen;
-			} else if (*src == '\\') {
-				*dst = '\\';
-				++src;
-				--slen;
-			} else if (*src == 'n') {
-				*dst = '\n';
-				++src;
-				--slen;
-			} else if (*src == 'r') {
-				*dst = '\r';
-				++src;
-				--slen;
-			} else if (*src == 'v') {
-				*dst = '\v';
-				++src;
-				--slen;
-			} else if (*src == 't') {
-				*dst = '\t';
-				++src;
-				--slen;
-			} else if (*src == 'b') {
-				*dst = '\b';
-				++src;
-				--slen;
-			} else if (*src == 'f') {
-				*dst = '\f';
-				++src;
-				--slen;
-			} else if (*src == 'x') {
-				++src;
-				--slen;
-				if (swscanf(src, L"%02X", dst) < 1) {
+			if (*str == '0') {
+				buf[size] = 0;
+				++str;
+			} else if (*str == '\'') {
+				buf[size] = '\'';
+				++str;
+			} else if (*str == '"') {
+				buf[size] = '"';
+				++str;
+			} else if (*str == '\\') {
+				buf[size] = '\\';
+				++str;
+			} else if (*str == 'n') {
+				buf[size] = '\n';
+				++str;
+			} else if (*str == 'r') {
+				buf[size] = '\r';
+				++str;
+			} else if (*str == 'v') {
+				buf[size] = '\v';
+				++str;
+			} else if (*str == 't') {
+				buf[size] = '\t';
+				++str;
+			} else if (*str == 'b') {
+				buf[size] = '\b';
+				++str;
+			} else if (*str == 'f') {
+				buf[size] = '\f';
+				++str;
+			} else if (*str == 'x') {
+				++str;
+				int tmp;
+				if (swscanf(str, L"%02X%n", &buf[size], &tmp) < 1 || tmp != 2) {
+					free(buf);
 					mdea_error(error, L"Expected \\xXX");
-					return -1;
+					return NULL;
 				}
-				src += 2;
-				slen -= 2;
-			} else if (*src == 'u') {
-				++src;
-				--slen;
-				if (*src == '{') {
+				str += 2;
+			} else if (*str == 'u') {
+				++str;
+				if (*str == '{') {
 					int tmp;
-					if (swscanf(src, L"{%X}%n", dst, &tmp) < 1) {
+					if (swscanf(str, L"{%X}%n", &buf[size], &tmp) < 1) {
+						free(buf);
 						mdea_error(error, L"Expected \\u{X} ... \\u{XXXXXX}");
-						return -1;
+						return NULL;
 					}
-					src += tmp;
-					slen -= tmp;
+					str += tmp;
 				} else {
-					if (swscanf(src, L"%04X", dst) < 1) {
+					int tmp;
+					if (swscanf(str, L"%04X%n", &buf[size], &tmp) < 1 || tmp != 4) {
+						free(buf);
 						mdea_error(error, L"Expected \\uXXXX");
-						return -1;
+						return NULL;
 					}
-					src += 4;
-					slen -= 4;
+					str += 4;
 				}
 			} else {
-				mdea_error(error, L"Unknown escape sequence: \\%lc", *src);
-				return -1;
+				free(buf);
+				mdea_error(error, L"Unknown escape sequence: \\%lc", *str);
+				return NULL;
 			}
 		}
-		++dst;
-		--dlen;
-		++ret;
+		++size;
 	}
-	if (!dlen) {
-		mdea_error(error, L"Not enough space");
-		return -1;
-	}
-	*dst = 0;
-	return ret;
+	return buf;
 }
 
 void mdea_destroy(struct MdeaNode *node)

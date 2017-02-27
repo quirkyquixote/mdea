@@ -46,7 +46,7 @@ struct MdeaNode {
 	};
 };
 
-ssize_t mdea_escape(wchar_t *dest, size_t dlen, wchar_t *src, size_t slen, wchar_t **error);
+wchar_t *mdea_escape(const wchar_t *str, wchar_t **error);
 
 void mdea_destroy(struct MdeaNode *node);
 

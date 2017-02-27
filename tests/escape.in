@@ -17,8 +17,16 @@ and these: \xA2
 and these: \xA4
 and these: \xA8
 and these: \xB0
+this is faulty: \x
+this is faulty: \x0
+this is faulty: \xMM
 unicode: \u0100
 unicode: \u0101
 unicode: \u0102
 unicode: \u0104
 unicode: \u0108
+this is faulty: \u
+this is faulty: \u0
+this is faulty: \u00
+this is faulty: \u000
+this is faulty: \uMMMM
