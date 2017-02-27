@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <wctype.h>
 
+
 void mdea_error(wchar_t **error, wchar_t *msg, ...)
 {
 	if (error == NULL)
@@ -16,22 +17,126 @@ void mdea_error(wchar_t **error, wchar_t *msg, ...)
 	va_end(ap);
 }
 
+ssize_t mdea_escape(wchar_t *dst, size_t dlen, wchar_t *src, size_t slen, wchar_t **error)
+{
+	ssize_t ret = 0;
+	while (*src && slen) {
+		if (!dlen) {
+			mdea_error(error, L"Not enough space");
+			return -1;
+		}
+		if (*src != '\\') {
+			*dst = *src;
+			++src;
+			--slen;
+		} else {
+			++src;
+			--slen;
+			if (!slen || *src == 0) {
+				mdea_error(error, L"Unexpected end of string");
+				return -1;
+			}
+			if (*src == '0') {
+				*dst = 0;
+				++src;
+				--slen;
+			} else if (*src == '\'') {
+				*dst = '\'';
+				++src;
+				--slen;
+			} else if (*src == '"') {
+				*dst = '"';
+				++src;
+				--slen;
+			} else if (*src == '\\') {
+				*dst = '\\';
+				++src;
+				--slen;
+			} else if (*src == 'n') {
+				*dst = '\n';
+				++src;
+				--slen;
+			} else if (*src == 'r') {
+				*dst = '\r';
+				++src;
+				--slen;
+			} else if (*src == 'v') {
+				*dst = '\v';
+				++src;
+				--slen;
+			} else if (*src == 't') {
+				*dst = '\t';
+				++src;
+				--slen;
+			} else if (*src == 'b') {
+				*dst = '\b';
+				++src;
+				--slen;
+			} else if (*src == 'f') {
+				*dst = '\f';
+				++src;
+				--slen;
+			} else if (*src == 'x') {
+				++src;
+				--slen;
+				if (swscanf(src, L"%02X", dst) < 1) {
+					mdea_error(error, L"Expected \\xXX");
+					return -1;
+				}
+				src += 2;
+				slen -= 2;
+			} else if (*src == 'u') {
+				++src;
+				--slen;
+				if (*src == '{') {
+					int tmp;
+					if (swscanf(src, L"{%X}%n", dst, &tmp) < 1) {
+						mdea_error(error, L"Expected \\u{X} ... \\u{XXXXXX}");
+						return -1;
+					}
+					src += tmp;
+					slen -= tmp;
+				} else {
+					if (swscanf(src, L"%04X", dst) < 1) {
+						mdea_error(error, L"Expected \\uXXXX");
+						return -1;
+					}
+					src += 4;
+					slen -= 4;
+				}
+			} else {
+				mdea_error(error, L"Unknown escape sequence: \\%lc", *src);
+				return -1;
+			}
+		}
+		++dst;
+		--dlen;
+		++ret;
+	}
+	if (!dlen) {
+		mdea_error(error, L"Not enough space");
+		return -1;
+	}
+	*dst = 0;
+	return ret;
+}
+
 void mdea_destroy(struct MdeaNode *node)
 {
 	switch (node->type) {
-	case MDEA_NULL:
-	case MDEA_NUMBER:
-	case MDEA_BOOLEAN:
-		break;
-	case MDEA_STRING:
-		free(node->string);
-		break;
-	case MDEA_ARRAY:
-		mdea_array_deinit(&node->array);
-		break;
-	case MDEA_OBJECT:
-		mdea_object_deinit(&node->object);
-		break;
+		case MDEA_NULL:
+		case MDEA_NUMBER:
+		case MDEA_BOOLEAN:
+			break;
+		case MDEA_STRING:
+			free(node->string);
+			break;
+		case MDEA_ARRAY:
+			mdea_array_deinit(&node->array);
+			break;
+		case MDEA_OBJECT:
+			mdea_object_deinit(&node->object);
+			break;
 	}
 	free(node);
 }
@@ -49,6 +154,7 @@ int read_string(FILE *f, wchar_t **rval, wchar_t **error)
 {
 	int c;
 	size_t size = 0, alloc = 0;
+	int escaped = 0;
 	*rval = NULL;
 	for (;;) {
 		c = fgetwc(f);
@@ -56,10 +162,14 @@ int read_string(FILE *f, wchar_t **rval, wchar_t **error)
 			mdea_error(error, L"Unexpected end of file");
 			return -1;
 		}
-		else if (c == '"')
-			c = 0;
-		else if (c == '\\')
-			c = fgetwc(f);
+		if (!escaped) {
+			if (c == '"')
+				c = 0;
+			else if (c == '\\')
+				escaped = 1;
+		} else {
+			escaped = 0;
+		}
 		if (size == alloc) {
 			alloc = alloc ? alloc * 2 : 2;
 			*rval = realloc(*rval, sizeof(**rval) * alloc);
@@ -80,7 +190,7 @@ int mdea_read(FILE *f, struct MdeaNode **rval, wchar_t **error)
 		*rval = mdea_array();
 		if (c == ']')
 			return 0;
-		ungetc(c, f);
+		ungetwc(c, f);
 		struct MdeaArray *array;
 		mdea_get_array(*rval, &array);
 		for (;;) {
@@ -101,7 +211,7 @@ int mdea_read(FILE *f, struct MdeaNode **rval, wchar_t **error)
 		*rval = mdea_object();
 		if (c == '}')
 			return 0;
-		ungetc(c, f);
+		ungetwc(c, f);
 		struct MdeaObject *obj;
 		mdea_get_object(*rval, &obj);
 		for (;;) {
@@ -164,7 +274,7 @@ int mdea_read(FILE *f, struct MdeaNode **rval, wchar_t **error)
 		*rval = mdea_boolean(0);
 		return 0;
 	} else if ((c >= '0' && c <= '9') || c == '.') {
-		ungetc(c, f);
+		ungetwc(c, f);
 		double data;
 		fwscanf(f, L"%lf", &data);
 		*rval = mdea_number(data);

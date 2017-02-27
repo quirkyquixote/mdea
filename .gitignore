@@ -5,3 +5,4 @@
 tests/array
 tests/object
 tests/parser
+tests/escape

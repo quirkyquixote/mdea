@@ -1,0 +1,49 @@
+foo
+foo
+hello, world
+hello, world
+this is a simple string
+this is a simple string
+and these are escaped: \0
+and these are escaped: 
+and these: \'
+and these: '
+and these: \"
+and these: "
+and these: \\
+and these: \
+and these: \n
+and these: 
+
+and these: \r
+and these: 
+and these: \v
+and these: 
+and these: \t
+and these: 	
+and these: \b
+and these: 
+and these: \f
+and these: 
+and these: \xA0
+and these:  
+and these: \xA1
+and these: ?
+and these: \xA2
+and these: ?
+and these: \xA4
+and these: ?
+and these: \xA8
+and these: ?
+and these: \xB0
+and these: ?
+unicode: \u0100
+unicode: ?
+unicode: \u0101
+unicode: ?
+unicode: \u0102
+unicode: ?
+unicode: \u0104
+unicode: ?
+unicode: \u0108
+unicode: ?

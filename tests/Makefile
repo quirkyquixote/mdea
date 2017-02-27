@@ -1,6 +1,7 @@
 
 include ../config.mk
 
+objs += escape.o
 objs += array.o
 objs += object.o
 objs += parser.o
@@ -20,6 +21,7 @@ clean:
 	$(RM) $(deps)
 	$(RM) $(logs)
 
+escape: escape.o ../mdea.o
 array: array.o ../mdea.o
 object: object.o ../mdea.o
 parser: parser.o ../mdea.o

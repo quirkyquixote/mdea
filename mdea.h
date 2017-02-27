@@ -46,6 +46,8 @@ struct MdeaNode {
 	};
 };
 
+ssize_t mdea_escape(wchar_t *dest, size_t dlen, wchar_t *src, size_t slen, wchar_t **error);
+
 void mdea_destroy(struct MdeaNode *node);
 
 static inline void mdea_array_init(struct MdeaArray *data)

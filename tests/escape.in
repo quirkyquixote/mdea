@@ -1,0 +1,24 @@
+foo
+hello, world
+this is a simple string
+and these are escaped: \0
+and these: \'
+and these: \"
+and these: \\
+and these: \n
+and these: \r
+and these: \v
+and these: \t
+and these: \b
+and these: \f
+and these: \xA0
+and these: \xA1
+and these: \xA2
+and these: \xA4
+and these: \xA8
+and these: \xB0
+unicode: \u0100
+unicode: \u0101
+unicode: \u0102
+unicode: \u0104
+unicode: \u0108
