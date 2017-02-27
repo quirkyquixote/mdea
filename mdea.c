@@ -1,11 +1,11 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#include "json.h"
+#include "mdea.h"
 
 #include <stdarg.h>
 #include <wctype.h>
 
-void json_error(wchar_t **error, wchar_t *msg, ...)
+void mdea_error(wchar_t **error, wchar_t *msg, ...)
 {
 	if (error == NULL)
 		return;
@@ -16,21 +16,21 @@ void json_error(wchar_t **error, wchar_t *msg, ...)
 	va_end(ap);
 }
 
-void json_destroy(struct JsonNode *node)
+void mdea_destroy(struct MdeaNode *node)
 {
 	switch (node->type) {
-	case JSON_NULL:
-	case JSON_NUMBER:
-	case JSON_BOOLEAN:
+	case MDEA_NULL:
+	case MDEA_NUMBER:
+	case MDEA_BOOLEAN:
 		break;
-	case JSON_STRING:
+	case MDEA_STRING:
 		free(node->string);
 		break;
-	case JSON_ARRAY:
-		json_array_deinit(&node->array);
+	case MDEA_ARRAY:
+		mdea_array_deinit(&node->array);
 		break;
-	case JSON_OBJECT:
-		json_object_deinit(&node->object);
+	case MDEA_OBJECT:
+		mdea_object_deinit(&node->object);
 		break;
 	}
 	free(node);
@@ -53,7 +53,7 @@ int read_string(FILE *f, wchar_t **rval, wchar_t **error)
 	for (;;) {
 		c = fgetwc(f);
 		if (c == WEOF) {
-			json_error(error, L"Unexpected end of file");
+			mdea_error(error, L"Unexpected end of file");
 			return -1;
 		}
 		else if (c == '"')
@@ -71,68 +71,68 @@ int read_string(FILE *f, wchar_t **rval, wchar_t **error)
 	}
 }
 
-int json_read(FILE *f, struct JsonNode **rval, wchar_t **error)
+int mdea_read(FILE *f, struct MdeaNode **rval, wchar_t **error)
 {
 	int c;
 	c = read_char(f);
 	if (c == '[') {
 		c = read_char(f);
-		*rval = json_array();
+		*rval = mdea_array();
 		if (c == ']')
 			return 0;
 		ungetc(c, f);
-		struct JsonArray *array;
-		json_get_array(*rval, &array);
+		struct MdeaArray *array;
+		mdea_get_array(*rval, &array);
 		for (;;) {
-			struct JsonNode *tmp;
-			if (json_read(f, &tmp, error) != 0)
+			struct MdeaNode *tmp;
+			if (mdea_read(f, &tmp, error) != 0)
 				return -1;
-			json_array_add(array, tmp);
+			mdea_array_add(array, tmp);
 			c = read_char(f);
 			if (c == ']')
 				return 0;
 			if (c != ',') {
-				json_error(error, L"Expected end of array");
+				mdea_error(error, L"Expected end of array");
 				return -1;
 			}
 		}
 	} else if (c == '{') {
 		c = read_char(f);
-		*rval = json_object();
+		*rval = mdea_object();
 		if (c == '}')
 			return 0;
 		ungetc(c, f);
-		struct JsonObject *obj;
-		json_get_object(*rval, &obj);
+		struct MdeaObject *obj;
+		mdea_get_object(*rval, &obj);
 		for (;;) {
 			wchar_t *key;
-			struct JsonNode *val;
+			struct MdeaNode *val;
 			c = read_char(f);
 			if (c != '"') {
-				json_error(error, L"Expected string");
+				mdea_error(error, L"Expected string");
 				return -1;
 			}
 			if (read_string(f, &key, error) != 0)
 				return -1;
 			c = read_char(f);
 			if (c != ':') {
-				json_error(error, L"Expected ':'");
-				json_object_add(obj, key, json_null());
+				mdea_error(error, L"Expected ':'");
+				mdea_object_add(obj, key, mdea_null());
 				free(key);
 				return -1;
 			}
-			if (json_read(f, &val, error) != 0) {
-				json_object_add(obj, key, json_null());
+			if (mdea_read(f, &val, error) != 0) {
+				mdea_object_add(obj, key, mdea_null());
 				free(key);
 				return -1;
 			}
-			json_object_add(obj, key, val);
+			mdea_object_add(obj, key, val);
 			free(key);
 			c = read_char(f);
 			if (c == '}')
 				return 0;
 			if (c != ',') {
-				json_error(error, L"Expected end of object");
+				mdea_error(error, L"Expected end of object");
 				return -1;
 			}
 		}
@@ -140,60 +140,60 @@ int json_read(FILE *f, struct JsonNode **rval, wchar_t **error)
 		wchar_t *data;
 		if (read_string(f, &data, error) != 0)
 			return -1;
-		*rval = json_string(data);
+		*rval = mdea_string(data);
 		return 0;
 	} else if (c == 'n') {
 		if (fgetwc(f) != 'u' || fgetwc(f) != 'l' || fgetwc(f) != 'l') {
-			json_error(error, L"Expected null");
+			mdea_error(error, L"Expected null");
 			return -1;
 		}
-		*rval = json_null();
+		*rval = mdea_null();
 		return 0;
 	} else if (c == 't') {
 		if (fgetwc(f) != 'r' || fgetwc(f) != 'u' || fgetwc(f) != 'e') {
-			json_error(error, L"Expected true");
+			mdea_error(error, L"Expected true");
 			return -1;
 		}
-		*rval = json_boolean(1);
+		*rval = mdea_boolean(1);
 		return 0;
 	} else if (c == 'f') {
 		if (fgetwc(f) != 'a' || fgetwc(f) != 'l' || fgetwc(f) != 's' || fgetwc(f) != 'e') {
-			json_error(error, L"Expected false");
+			mdea_error(error, L"Expected false");
 			return -1;
 		}
-		*rval = json_boolean(0);
+		*rval = mdea_boolean(0);
 		return 0;
 	} else if ((c >= '0' && c <= '9') || c == '.') {
 		ungetc(c, f);
 		double data;
 		fwscanf(f, L"%lf", &data);
-		*rval = json_number(data);
+		*rval = mdea_number(data);
 		return 0;
 	} else {
 		if (iswprint(c))
-			json_error(error, L"Unexpected character: '%lc'", c);
+			mdea_error(error, L"Unexpected character: '%lc'", c);
 		else
-			json_error(error, L"Unexpected character: \\%x", c);
+			mdea_error(error, L"Unexpected character: \\%x", c);
 		return -1;
 	}
 }
 
-int json_write(FILE *f, struct JsonNode *root, int indent, wchar_t **error)
+int mdea_write(FILE *f, struct MdeaNode *root, int indent, wchar_t **error)
 {
 	switch (root->type) {
-		case JSON_NULL:
+		case MDEA_NULL:
 			fwprintf(f, L"null");
 			return 0;
-		case JSON_NUMBER:
+		case MDEA_NUMBER:
 			fwprintf(f, L"%g", root->number);
 			return 0;
-		case JSON_STRING:
+		case MDEA_STRING:
 			fwprintf(f, L"\"%ls\"", root->string);
 			return 0;
-		case JSON_BOOLEAN:
+		case MDEA_BOOLEAN:
 			fwprintf(f, L"%ls", root->boolean ? L"true" : L"false");
 			return 0;
-		case JSON_ARRAY:
+		case MDEA_ARRAY:
 			if (root->array.size == 0) {
 				fwprintf(f, L"[]");
 			} else {
@@ -206,7 +206,7 @@ int json_write(FILE *f, struct JsonNode *root, int indent, wchar_t **error)
 						fwprintf(f, L",\n");
 					for (int i = 0; i <= indent; ++i)
 						fwprintf(f, L"  ");
-					json_write(f, root->array.vals[i], indent + 1, error);
+					mdea_write(f, root->array.vals[i], indent + 1, error);
 				}
 				fwprintf(f, L"\n");
 				for (int i = 0; i < indent; ++i)
@@ -214,7 +214,7 @@ int json_write(FILE *f, struct JsonNode *root, int indent, wchar_t **error)
 				fwprintf(f, L"]");
 			}
 			return 0;
-		case JSON_OBJECT:
+		case MDEA_OBJECT:
 			if (root->object.size == 0) {
 				fwprintf(f, L"{}");
 			} else {
@@ -228,7 +228,7 @@ int json_write(FILE *f, struct JsonNode *root, int indent, wchar_t **error)
 					for (int i = 0; i <= indent; ++i)
 						fwprintf(f, L"  ");
 					fwprintf(f, L"\"%ls\": ", root->object.fields[i].key);
-					json_write(f, root->object.fields[i].val, indent + 1, error);
+					mdea_write(f, root->object.fields[i].val, indent + 1, error);
 				}
 				fwprintf(f, L"\n");
 				for (int i = 0; i < indent; ++i)
@@ -240,7 +240,7 @@ int json_write(FILE *f, struct JsonNode *root, int indent, wchar_t **error)
 	return -1;
 }
 
-int json_get(struct JsonNode *root, struct JsonNode **rval, ...)
+int mdea_get(struct MdeaNode *root, struct MdeaNode **rval, ...)
 {
 	int found = 0;
 	va_list ap;
@@ -251,10 +251,10 @@ int json_get(struct JsonNode *root, struct JsonNode **rval, ...)
 			found = 1;
 			break;
 		}
-		struct JsonObject *obj;
-		if (json_get_object(root, &obj) != 0)
+		struct MdeaObject *obj;
+		if (mdea_get_object(root, &obj) != 0)
 			break;
-		if (json_object_get(obj, key, (void**)&root) != 0)
+		if (mdea_object_get(obj, key, (void**)&root) != 0)
 			break;
 	}
 	va_end(ap);

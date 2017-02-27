@@ -20,9 +20,9 @@ clean:
 	$(RM) $(deps)
 	$(RM) $(logs)
 
-array: array.o ../json.o
-object: object.o ../json.o
-parser: parser.o ../json.o
+array: array.o ../mdea.o
+object: object.o ../mdea.o
+parser: parser.o ../mdea.o
 
 %.log: % %.in make-always
 	$(QUIET_GEN)./$< < $<.in > $@ 2>&1

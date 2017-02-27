@@ -1,11 +1,11 @@
 
 include config.mk
 
-objs += json.o
+objs += mdea.o
 
 deps = $(objs:.o=.d)
 
-libs = libjson.so
+libs = libmdea.so
 install_libs = $(addprefix $(libdir)/,$(libs))
 
 .PHONY: all
@@ -44,6 +44,6 @@ clean-test:
 realclean:
 	git clean -fdx
 
-libjson.so: $(objs)
+libmdea.so: $(objs)
 
 -include $(deps)
