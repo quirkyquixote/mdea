@@ -270,7 +270,7 @@ int mdea_read(FILE *f, struct MdeaNode **rval, wchar_t **error)
 		if (iswprint(c))
 			mdea_error(error, L"Unexpected character: '%lc'", c);
 		else
-			mdea_error(error, L"Unexpected character: \\%x", c);
+			mdea_error(error, L"Unexpected character: \\u%04X", c);
 		return -1;
 	}
 }
