@@ -1,16 +1,22 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#include "../mdea.h"
+#include <stdio.h>
+#include <wchar.h>
+
+#include "../array.h"
+
+void mdea_destroy(void *ptr)
+{
+	free(ptr);
+}
 
 void print_array(struct MdeaArray *array)
 {
-	struct MdeaNode *iter;
-	const wchar_t *str;
+	const wchar_t *iter;
 
 	printf("%zu elements:\n", array->size);
 	mdea_array_foreach(iter, array) {
-		mdea_get_string(iter, &str);
-		printf("%ls\n", str);
+		printf("%ls\n", iter);
 	}
 }
 
@@ -26,7 +32,7 @@ int main(int argc, char *argv[])
 			size_t len = strlen(line + 1) + 1;
 			wchar_t tmp[len];
 			mbstowcs(tmp, line + 1, len);
-			mdea_array_add(&array, mdea_string(tmp));
+			mdea_array_add(&array, wcsdup(tmp));
 		} else if (line[0] == '-') {
 			long key = strtol(line + 1, NULL, 10);
 			mdea_array_remove(&array, key);

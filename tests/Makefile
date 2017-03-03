@@ -21,10 +21,10 @@ clean:
 	$(RM) $(deps)
 	$(RM) $(logs)
 
-escape: escape.o ../mdea.o
-array: array.o ../mdea.o
-object: object.o ../mdea.o
-parser: parser.o ../mdea.o
+escape: escape.o ../escape.o ../error.o
+array: array.o
+object: object.o
+parser: parser.o ../mdea.o ../error.o ../token.o
 
 %.log: % %.in make-always
 	$(QUIET_GEN)./$< < $<.in > $@ 2>&1

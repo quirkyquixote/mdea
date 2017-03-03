@@ -1,6 +1,9 @@
 
 include config.mk
 
+objs += error.o
+objs += escape.o
+objs += token.o
 objs += mdea.o
 
 deps = $(objs:.o=.d)
@@ -22,15 +25,15 @@ install: all $(install_libs)
 
 .PHONY: examples
 examples: all
-	@make -C examples $@
+	@make -C examples all
 
 .PHONY: clean-examples
 clean-examples:
-	@make -C examples $@
+	@make -C examples clean
 
 .PHONY: install-examples
 install-examples: install
-	@make -C examples $@
+	@make -C examples install
 
 .PHONY: test
 test: all

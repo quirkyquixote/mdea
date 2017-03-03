@@ -1,17 +1,22 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#include "../mdea.h"
+#include "../object.h"
+
+#include <stdio.h>
+
+void mdea_destroy(void *ptr)
+{
+	free(ptr);
+}
 
 void print_object(struct MdeaObject *object)
 {
 	wchar_t *key;
-	struct MdeaNode *val;
-	const wchar_t *str;
+	const wchar_t *val;
 
 	printf("%zu elements:\n", object->size);
 	mdea_object_foreach(key, val, object) {
-		mdea_get_string(val, &str);
-		printf("%ls: %ls\n", key, str);
+		printf("%ls: %ls\n", key, val);
 	}
 }
 
@@ -27,7 +32,7 @@ int main(int argc, char *argv[])
 			size_t len = strlen(line + 1) + 1;
 			wchar_t tmp[len];
 			mbstowcs(tmp, line + 1, len);
-			mdea_object_add(&object, tmp, mdea_string(tmp));
+			mdea_object_add(&object, tmp, wcsdup(tmp));
 		} else if (line[0] == '-') {
 			size_t len = strlen(line + 1) + 1;
 			wchar_t tmp[len];
