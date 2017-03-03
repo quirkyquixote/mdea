@@ -7,27 +7,6 @@
 
 #include "token.h"
 
-void mdea_destroy(void *ptr)
-{
-	struct MdeaNode *node = ptr;
-	switch (node->type) {
-		case MDEA_NULL:
-		case MDEA_NUMBER:
-		case MDEA_BOOLEAN:
-			break;
-		case MDEA_STRING:
-			free(node->string);
-			break;
-		case MDEA_ARRAY:
-			mdea_array_deinit(&node->array);
-			break;
-		case MDEA_OBJECT:
-			mdea_object_deinit(&node->object);
-			break;
-	}
-	free(node);
-}
-
 int mdea_parse(FILE *file, struct MdeaToken *tok, struct MdeaNode **rval, wchar_t **error)
 {
 	if (tok->type == MDEA_TOK_END) {
@@ -55,7 +34,7 @@ int mdea_parse(FILE *file, struct MdeaToken *tok, struct MdeaNode **rval, wchar_
 		if (tok->type == MDEA_TOK_RBRACKET)
 			return 0;
 		struct MdeaArray *array;
-		mdea_get_array(*rval, &array);
+		mdea_get_array(*rval, &array, NULL);
 		for (;;) {
 			struct MdeaNode *tmp;
 			if (mdea_parse(file, tok, &tmp, error) != 0)
@@ -79,7 +58,7 @@ int mdea_parse(FILE *file, struct MdeaToken *tok, struct MdeaNode **rval, wchar_
 		if (tok->type == MDEA_TOK_RCURLY)
 			return 0;
 		struct MdeaObject *object;
-		mdea_get_object(*rval, &object);
+		mdea_get_object(*rval, &object, NULL);
 		for (;;) {
 			struct MdeaToken tok2;
 			struct MdeaNode *tmp;
@@ -126,66 +105,9 @@ int mdea_read(FILE *f, struct MdeaNode **rval, wchar_t **error)
 	return ret;
 }
 
-int mdea_write(FILE *f, struct MdeaNode *root, int indent, wchar_t **error)
+int mdea_write(FILE *f, struct MdeaNode *root, wchar_t **error)
 {
-	switch (root->type) {
-		case MDEA_NULL:
-			fwprintf(f, L"null");
-			return 0;
-		case MDEA_NUMBER:
-			fwprintf(f, L"%g", root->number);
-			return 0;
-		case MDEA_STRING:
-			fwprintf(f, L"\"%ls\"", root->string);
-			return 0;
-		case MDEA_BOOLEAN:
-			fwprintf(f, L"%ls", root->boolean ? L"true" : L"false");
-			return 0;
-		case MDEA_ARRAY:
-			if (root->array.size == 0) {
-				fwprintf(f, L"[]");
-			} else {
-				int is_first = 1;
-				fwprintf(f, L"[\n");
-				for (int i = 0; i < root->array.size; ++i) {
-					if (is_first)
-						is_first = 0;
-					else
-						fwprintf(f, L",\n");
-					for (int i = 0; i <= indent; ++i)
-						fwprintf(f, L"  ");
-					mdea_write(f, root->array.vals[i], indent + 1, error);
-				}
-				fwprintf(f, L"\n");
-				for (int i = 0; i < indent; ++i)
-					fwprintf(f, L"  ");
-				fwprintf(f, L"]");
-			}
-			return 0;
-		case MDEA_OBJECT:
-			if (root->object.size == 0) {
-				fwprintf(f, L"{}");
-			} else {
-				int is_first = 1;
-				fwprintf(f, L"{\n");
-				for (int i = 0; i < root->object.size; ++i) {
-					if (is_first)
-						is_first = 0;
-					else
-						fwprintf(f, L",\n");
-					for (int i = 0; i <= indent; ++i)
-						fwprintf(f, L"  ");
-					fwprintf(f, L"\"%ls\": ", root->object.fields[i].key);
-					mdea_write(f, root->object.fields[i].val, indent + 1, error);
-				}
-				fwprintf(f, L"\n");
-				for (int i = 0; i < indent; ++i)
-					fwprintf(f, L"  ");
-				fwprintf(f, L"}");
-			}
-			return 0;
-	}
-	return -1;
+	return mdea_serialize(root, f, 0, error);
 }
 
 int mdea_get(struct MdeaNode *root, struct MdeaNode **rval, ...)
@@ -200,7 +122,7 @@ int mdea_get(struct MdeaNode *root, struct MdeaNode **rval, ...)
 			break;
 		}
 		struct MdeaObject *obj;
-		if (mdea_get_object(root, &obj) != 0)
+		if (mdea_get_object(root, &obj, NULL) != 0)
 			break;
 		if (mdea_object_get(obj, key, (void**)&root) != 0)
 			break;

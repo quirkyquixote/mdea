@@ -4,6 +4,7 @@ include config.mk
 objs += error.o
 objs += escape.o
 objs += token.o
+objs += node.o
 objs += mdea.o
 
 deps = $(objs:.o=.d)

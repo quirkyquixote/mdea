@@ -24,7 +24,7 @@ clean:
 escape: escape.o ../escape.o ../error.o
 array: array.o
 object: object.o
-parser: parser.o ../mdea.o ../error.o ../token.o
+parser: parser.o ../mdea.o ../error.o ../token.o ../node.o
 
 %.log: % %.in make-always
 	$(QUIET_GEN)./$< < $<.in > $@ 2>&1

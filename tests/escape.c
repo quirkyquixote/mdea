@@ -1,5 +1,7 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
+#include <stdio.h>
+
 #include "../mdea.h"
 
 int main(int argc, char *argv[])
