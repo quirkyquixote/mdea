@@ -6,7 +6,7 @@
 
 #include "error.h"
 
-int mdea_next_token(FILE *file, struct MdeaToken *tok, wchar_t **error)
+int mdea_next_token(FILE *file, struct mdea_token *tok, wchar_t **error)
 {
 	mdea_token_destroy(tok);
 	int c;

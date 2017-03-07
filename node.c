@@ -2,38 +2,38 @@
 
 #include "node.h"
 
-struct MdeaNullNode {
-	const struct MdeaNodeType *type;
+struct mdea_null_node {
+	const struct mdea_node_type *type;
 };
 
-struct MdeaNumberNode {
-	const struct MdeaNodeType *type;
+struct mdea_number_node {
+	const struct mdea_node_type *type;
 	double number;
 };
 
-struct MdeaStringNode {
-	const struct MdeaNodeType *type;
+struct mdea_string_node {
+	const struct mdea_node_type *type;
 	wchar_t *string;
 };
 
-struct MdeaBooleanNode {
-	const struct MdeaNodeType *type;
+struct mdea_boolean_node {
+	const struct mdea_node_type *type;
 	int boolean;
 };
 
-struct MdeaArrayNode {
-	const struct MdeaNodeType *type;
-	struct MdeaArray array;
+struct mdea_array_node {
+	const struct mdea_node_type *type;
+	struct mdea_array array;
 };
 
-struct MdeaObjectNode {
-	const struct MdeaNodeType *type;
-	struct MdeaObject object;
+struct mdea_object_node {
+	const struct mdea_node_type *type;
+	struct mdea_object object;
 };
 
 void mdea_destroy(void *ptr)
 {
-	struct MdeaNode *node = ptr;
+	struct mdea_node *node = ptr;
 	node->type->destroy(node);
 	free(node);
 }
@@ -44,19 +44,19 @@ void mdea_node_destroy(void *p)
 
 void mdea_string_node_destroy(void *p)
 {
-	struct MdeaStringNode *n = p;
+	struct mdea_string_node *n = p;
 	free(n->string);
 }
 
 void mdea_array_node_destroy(void *p)
 {
-	struct MdeaArrayNode *n = p;
+	struct mdea_array_node *n = p;
 	mdea_array_deinit(&n->array);
 }
 
 void mdea_object_node_destroy(void *p)
 {
-	struct MdeaObjectNode *n = p;
+	struct mdea_object_node *n = p;
 	mdea_object_deinit(&n->object);
 }
 
@@ -78,13 +78,13 @@ int mdea_node_get_boolean(void *p, int *boolean, wchar_t **error)
 	return -1;
 }
 
-int mdea_node_get_array(void *p, struct MdeaArray **array, wchar_t **error)
+int mdea_node_get_array(void *p, struct mdea_array **array, wchar_t **error)
 {
 	mdea_error(error, L"Not an array");
 	return -1;
 }
 
-int mdea_node_get_object(void *p, struct MdeaObject **object, wchar_t **error)
+int mdea_node_get_object(void *p, struct mdea_object **object, wchar_t **error)
 {
 	mdea_error(error, L"Not an object");
 	return -1;
@@ -92,35 +92,35 @@ int mdea_node_get_object(void *p, struct MdeaObject **object, wchar_t **error)
 
 int mdea_number_node_get_number(void *p, double *number, wchar_t **error)
 {
-	struct MdeaNumberNode *n = p;
+	struct mdea_number_node *n = p;
 	*number = n->number;
 	return 0;
 }
 
 int mdea_string_node_get_string(void *p, const wchar_t **string, wchar_t **error)
 {
-	struct MdeaStringNode *n = p;
+	struct mdea_string_node *n = p;
 	*string = n->string;
 	return 0;
 }
 
 int mdea_boolean_node_get_boolean(void *p, int *boolean, wchar_t **error)
 {
-	struct MdeaBooleanNode *n = p;
+	struct mdea_boolean_node *n = p;
 	*boolean = n->boolean;
 	return 0;
 }
 
-int mdea_array_node_get_array(void *p, struct MdeaArray **array, wchar_t **error)
+int mdea_array_node_get_array(void *p, struct mdea_array **array, wchar_t **error)
 {
-	struct MdeaArrayNode *n = p;
+	struct mdea_array_node *n = p;
 	*array = &n->array;
 	return 0;
 }
 
-int mdea_object_node_get_object(void *p, struct MdeaObject **object, wchar_t **error)
+int mdea_object_node_get_object(void *p, struct mdea_object **object, wchar_t **error)
 {
-	struct MdeaObjectNode *n = p;
+	struct mdea_object_node *n = p;
 	*object = &n->object;
 	return 0;
 }
@@ -157,7 +157,7 @@ int mdea_boolean_node_serialize(void *p, FILE *f, int indent, wchar_t **error)
 
 int mdea_array_node_serialize(void *p, FILE *f, int indent, wchar_t **error)
 {
-	struct MdeaArray *array;
+	struct mdea_array *array;
 	mdea_get_array(p, &array, NULL);
 	if (array->size == 0) {
 		fwprintf(f, L"[]");
@@ -183,7 +183,7 @@ int mdea_array_node_serialize(void *p, FILE *f, int indent, wchar_t **error)
 
 int mdea_object_node_serialize(void *p, FILE *f, int indent, wchar_t **error)
 {
-	struct MdeaObject *object;
+	struct mdea_object *object;
 	mdea_get_object(p, &object, NULL);
 	if (object->size == 0) {
 		fwprintf(f, L"{}");
@@ -208,7 +208,7 @@ int mdea_object_node_serialize(void *p, FILE *f, int indent, wchar_t **error)
 	return 0;
 }
 
-const struct MdeaNodeType mdea_null_node_type = {
+const struct mdea_node_type mdea_null_node_type = {
 	mdea_node_destroy,
 	mdea_null_node_serialize,
 	mdea_node_get_number,
@@ -218,7 +218,7 @@ const struct MdeaNodeType mdea_null_node_type = {
 	mdea_node_get_object,
 };
 
-const struct MdeaNodeType mdea_number_node_type = {
+const struct mdea_node_type mdea_number_node_type = {
 	mdea_node_destroy,
 	mdea_number_node_serialize,
 	mdea_number_node_get_number,
@@ -228,7 +228,7 @@ const struct MdeaNodeType mdea_number_node_type = {
 	mdea_node_get_object,
 };
 
-const struct MdeaNodeType mdea_string_node_type = {
+const struct mdea_node_type mdea_string_node_type = {
 	mdea_string_node_destroy,
 	mdea_string_node_serialize,
 	mdea_node_get_number,
@@ -238,7 +238,7 @@ const struct MdeaNodeType mdea_string_node_type = {
 	mdea_node_get_object,
 };
 
-const struct MdeaNodeType mdea_boolean_node_type = {
+const struct mdea_node_type mdea_boolean_node_type = {
 	mdea_node_destroy,
 	mdea_boolean_node_serialize,
 	mdea_node_get_number,
@@ -248,7 +248,7 @@ const struct MdeaNodeType mdea_boolean_node_type = {
 	mdea_node_get_object,
 };
 
-const struct MdeaNodeType mdea_array_node_type = {
+const struct mdea_node_type mdea_array_node_type = {
 	mdea_array_node_destroy,
 	mdea_array_node_serialize,
 	mdea_node_get_number,
@@ -258,7 +258,7 @@ const struct MdeaNodeType mdea_array_node_type = {
 	mdea_node_get_object,
 };
 
-const struct MdeaNodeType mdea_object_node_type = {
+const struct mdea_node_type mdea_object_node_type = {
 	mdea_object_node_destroy,
 	mdea_object_node_serialize,
 	mdea_node_get_number,
@@ -268,48 +268,48 @@ const struct MdeaNodeType mdea_object_node_type = {
 	mdea_object_node_get_object,
 };
 
-struct MdeaNode *mdea_null(void)
+struct mdea_node *mdea_null(void)
 {
-	struct MdeaNullNode *n = calloc(1, sizeof(*n));
+	struct mdea_null_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_null_node_type;
 	return (void *)n;
 }
 
-struct MdeaNode *mdea_number(double number)
+struct mdea_node *mdea_number(double number)
 {
-	struct MdeaNumberNode *n = calloc(1, sizeof(*n));
+	struct mdea_number_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_number_node_type;
 	n->number = number;
 	return (void *)n;
 }
 
-struct MdeaNode *mdea_string(const wchar_t *string)
+struct mdea_node *mdea_string(const wchar_t *string)
 {
-	struct MdeaStringNode *n = calloc(1, sizeof(*n));
+	struct mdea_string_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_string_node_type;
 	n->string = wcsdup(string);
 	return (void *)n;
 }
 
-struct MdeaNode *mdea_boolean(int boolean)
+struct mdea_node *mdea_boolean(int boolean)
 {
-	struct MdeaBooleanNode *n = calloc(1, sizeof(*n));
+	struct mdea_boolean_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_boolean_node_type;
 	n->boolean = boolean;
 	return (void *)n;
 }
 
-struct MdeaNode *mdea_array(void)
+struct mdea_node *mdea_array(void)
 {
-	struct MdeaArrayNode *n = calloc(1, sizeof(*n));
+	struct mdea_array_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_array_node_type;
 	mdea_array_init(&n->array);
 	return (void *)n;
 }
 
-struct MdeaNode *mdea_object(void)
+struct mdea_node *mdea_object(void)
 {
-	struct MdeaObjectNode *n = calloc(1, sizeof(*n));
+	struct mdea_object_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_object_node_type;
 	mdea_object_init(&n->object);
 	return (void *)n;

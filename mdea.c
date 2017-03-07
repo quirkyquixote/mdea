@@ -7,7 +7,7 @@
 
 #include "token.h"
 
-int mdea_parse(FILE *file, struct MdeaToken *tok, struct MdeaNode **rval, wchar_t **error)
+int mdea_parse(FILE *file, struct mdea_token *tok, struct mdea_node **rval, wchar_t **error)
 {
 	if (tok->type == MDEA_TOK_END) {
 		mdea_error(error, L"Unexpected end of file");
@@ -33,10 +33,10 @@ int mdea_parse(FILE *file, struct MdeaToken *tok, struct MdeaNode **rval, wchar_
 			return -1;
 		if (tok->type == MDEA_TOK_RBRACKET)
 			return 0;
-		struct MdeaArray *array;
+		struct mdea_array *array;
 		mdea_get_array(*rval, &array, NULL);
 		for (;;) {
-			struct MdeaNode *tmp;
+			struct mdea_node *tmp;
 			if (mdea_parse(file, tok, &tmp, error) != 0)
 				return -1;
 			mdea_array_add(array, tmp);
@@ -57,11 +57,11 @@ int mdea_parse(FILE *file, struct MdeaToken *tok, struct MdeaNode **rval, wchar_
 			return -1;
 		if (tok->type == MDEA_TOK_RCURLY)
 			return 0;
-		struct MdeaObject *object;
+		struct mdea_object *object;
 		mdea_get_object(*rval, &object, NULL);
 		for (;;) {
-			struct MdeaToken tok2;
-			struct MdeaNode *tmp;
+			struct mdea_token tok2;
+			struct mdea_node *tmp;
 			if (tok->type != MDEA_TOK_STRING) {
 				mdea_error(error, L"Expected string");
 				return -1;
@@ -93,9 +93,9 @@ int mdea_parse(FILE *file, struct MdeaToken *tok, struct MdeaNode **rval, wchar_
 	return -1;
 }
 
-int mdea_read(FILE *f, struct MdeaNode **rval, wchar_t **error)
+int mdea_read(FILE *f, struct mdea_node **rval, wchar_t **error)
 {
-	struct MdeaToken tok;
+	struct mdea_token tok;
 	int ret = -1;
 	if (mdea_next_token(f, &tok, error) == 0) {
 		if (mdea_parse(f, &tok, rval, error) == 0)
@@ -105,12 +105,12 @@ int mdea_read(FILE *f, struct MdeaNode **rval, wchar_t **error)
 	return ret;
 }
 
-int mdea_write(FILE *f, struct MdeaNode *root, wchar_t **error)
+int mdea_write(FILE *f, struct mdea_node *root, wchar_t **error)
 {
 	return mdea_serialize(root, f, 0, error);
 }
 
-int mdea_get(struct MdeaNode *root, struct MdeaNode **rval, ...)
+int mdea_get(struct mdea_node *root, struct mdea_node **rval, ...)
 {
 	int found = 0;
 	va_list ap;
@@ -121,7 +121,7 @@ int mdea_get(struct MdeaNode *root, struct MdeaNode **rval, ...)
 			found = 1;
 			break;
 		}
-		struct MdeaObject *obj;
+		struct mdea_object *obj;
 		if (mdea_get_object(root, &obj, NULL) != 0)
 			break;
 		if (mdea_object_get(obj, key, (void**)&root) != 0)

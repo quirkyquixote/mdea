@@ -9,9 +9,9 @@
 #include "object.h"
 #include "node.h"
 
-int mdea_read(FILE *f, struct MdeaNode **node, wchar_t **error);
-int mdea_write(FILE *f, struct MdeaNode *node, wchar_t **error);
-int mdea_get(struct MdeaNode *root, struct MdeaNode **rval, ...);
+int mdea_read(FILE *f, struct mdea_node **node, wchar_t **error);
+int mdea_write(FILE *f, struct mdea_node *node, wchar_t **error);
+int mdea_get(struct mdea_node *root, struct mdea_node **rval, ...);
 
 #endif  // MDEA_H_
 

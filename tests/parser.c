@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-	struct MdeaNode *root;
+	struct mdea_node *root;
 	wchar_t *error;
 
 	if (argc > 1) {

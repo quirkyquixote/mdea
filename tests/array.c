@@ -10,7 +10,7 @@ void mdea_destroy(void *ptr)
 	free(ptr);
 }
 
-void print_array(struct MdeaArray *array)
+void print_array(struct mdea_array *array)
 {
 	const wchar_t *iter;
 
@@ -22,7 +22,7 @@ void print_array(struct MdeaArray *array)
 
 int main(int argc, char *argv[])
 {
-	struct MdeaArray array;
+	struct mdea_array array;
 	char line[256];
 
 	mdea_array_init(&array);

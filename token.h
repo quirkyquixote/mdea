@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <wchar.h>
 
-struct MdeaToken {
+struct mdea_token {
 	enum {
 		MDEA_TOK_NULL,
 		MDEA_TOK_TRUE,
@@ -28,12 +28,12 @@ struct MdeaToken {
 	};
 };
 
-static inline void mdea_token_destroy(struct MdeaToken *t)
+static inline void mdea_token_destroy(struct mdea_token *t)
 {
 	if (t->type == MDEA_TOK_STRING)
 		free(t->string);
 }
 
-int mdea_next_token(FILE *file, struct MdeaToken *tok, wchar_t **error);
+int mdea_next_token(FILE *file, struct mdea_token *tok, wchar_t **error);
 
 #endif  // MDEA_TOKEN_H_

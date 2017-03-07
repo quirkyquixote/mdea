@@ -9,7 +9,7 @@ void mdea_destroy(void *ptr)
 	free(ptr);
 }
 
-void print_object(struct MdeaObject *object)
+void print_object(struct mdea_object *object)
 {
 	wchar_t *key;
 	const wchar_t *val;
@@ -22,7 +22,7 @@ void print_object(struct MdeaObject *object)
 
 int main(int argc, char *argv[])
 {
-	struct MdeaObject object;
+	struct mdea_object object;
 	char line[256];
 
 	mdea_object_init(&object);

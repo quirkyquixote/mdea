@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct MdeaArray {
+struct mdea_array {
 	size_t alloc;
 	size_t size;
 	void **vals;
@@ -14,14 +14,14 @@ struct MdeaArray {
 
 extern void mdea_destroy(void *);
 
-static inline void mdea_array_init(struct MdeaArray *data)
+static inline void mdea_array_init(struct mdea_array *data)
 {
 	data->alloc = 0;
 	data->size = 0;
 	data->vals = NULL;
 }
 
-static inline void mdea_array_deinit(struct MdeaArray *data)
+static inline void mdea_array_deinit(struct mdea_array *data)
 {
 	if (data->size) {
 		for (size_t i = 0; i < data->size; ++i)
@@ -30,7 +30,7 @@ static inline void mdea_array_deinit(struct MdeaArray *data)
 	}
 }
 
-static inline int mdea_array_add(struct MdeaArray *data, void *val)
+static inline int mdea_array_add(struct mdea_array *data, void *val)
 {
 	if (data->alloc == data->size) {
 		data->alloc = data->alloc ? data->alloc * 2 : 2;
@@ -41,7 +41,7 @@ static inline int mdea_array_add(struct MdeaArray *data, void *val)
 	return 0;
 }
 
-static inline int mdea_array_remove(struct MdeaArray *data, size_t i)
+static inline int mdea_array_remove(struct mdea_array *data, size_t i)
 {
 	if (i >= data->size)
 		return -1;
@@ -52,7 +52,7 @@ static inline int mdea_array_remove(struct MdeaArray *data, size_t i)
 	return 0;
 }
 
-static inline int mdea_array_get(struct MdeaArray *data, size_t key, void **rval)
+static inline int mdea_array_get(struct mdea_array *data, size_t key, void **rval)
 {
 	if (key >= data->size)
 		return -1;

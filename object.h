@@ -9,10 +9,10 @@
 
 #include "object.h"
 
-struct MdeaObject {
+struct mdea_object {
 	size_t alloc;
 	size_t size;
-	struct MdeaObjectField {
+	struct mdea_objectField {
 		wchar_t *key;
 		void *val;
 	} *fields;
@@ -20,14 +20,14 @@ struct MdeaObject {
 
 extern void mdea_destroy(void *);
 
-static inline void mdea_object_init(struct MdeaObject *data)
+static inline void mdea_object_init(struct mdea_object *data)
 {
 	data->alloc = 0;
 	data->size = 0;
 	data->fields = NULL;
 }
 
-static inline void mdea_object_deinit(struct MdeaObject *data)
+static inline void mdea_object_deinit(struct mdea_object *data)
 {
 	if (data->size) {
 		for (size_t i = 0; i < data->size; ++i) {
@@ -38,7 +38,7 @@ static inline void mdea_object_deinit(struct MdeaObject *data)
 	}
 }
 
-static inline int mdea_object_add(struct MdeaObject *data, const wchar_t *key, void *val)
+static inline int mdea_object_add(struct mdea_object *data, const wchar_t *key, void *val)
 {
 	for (size_t i = 0; i < data->size; ++i) {
 		if (wcscmp(key, data->fields[i].key) == 0) {
@@ -58,7 +58,7 @@ static inline int mdea_object_add(struct MdeaObject *data, const wchar_t *key, v
 	return 0;
 }
 
-static inline int mdea_object_remove(struct MdeaObject *data, const wchar_t *key)
+static inline int mdea_object_remove(struct mdea_object *data, const wchar_t *key)
 {
 	for (size_t i = 0; i < data->size; ++i) {
 		if (wcscmp(key, data->fields[i].key) == 0) {
@@ -73,7 +73,7 @@ static inline int mdea_object_remove(struct MdeaObject *data, const wchar_t *key
 	return -1;
 }
 
-static inline int mdea_object_get(struct MdeaObject *data, const wchar_t *key, void **rval)
+static inline int mdea_object_get(struct mdea_object *data, const wchar_t *key, void **rval)
 {
 	for (size_t i = 0; i < data->size; ++i) {
 		if (wcscmp(key, data->fields[i].key) == 0) {
