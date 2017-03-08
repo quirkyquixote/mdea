@@ -5,6 +5,8 @@
 
 #include <wchar.h>
 
-void mdea_error(wchar_t **error, wchar_t *msg, ...);
+/* If error is not NULL, initialize it from the printf-like fmt string and
+ * extra arguments */
+void mdea_error(wchar_t **error, wchar_t *fmt, ...);
 
 #endif  // MDEA_ERROR_H_

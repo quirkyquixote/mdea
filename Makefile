@@ -3,9 +3,13 @@ include config.mk
 
 objs += error.o
 objs += escape.o
-objs += token.o
 objs += node.o
-objs += mdea.o
+objs += path.o
+objs += parser.o
+objs += file_parser.o
+objs += string_parser.o
+objs += file_emitter.o
+objs += string_emitter.o
 
 deps = $(objs:.o=.d)
 

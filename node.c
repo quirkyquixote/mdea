@@ -125,86 +125,119 @@ int mdea_object_node_get_object(void *p, struct mdea_object **object, wchar_t **
 	return 0;
 }
 
-int mdea_null_node_serialize(void *p, FILE *f, int indent, wchar_t **error)
+int mdea_null_node_serialize(void *p, struct mdea_emitter *f, int indent, wchar_t **error)
 {
-	fwprintf(f, L"null");
+	if (mdea_emitter_emit_string(f, L"null", error) != 0)
+		return -1;
 	return 0;
 }
 
-int mdea_number_node_serialize(void *p, FILE *f, int indent, wchar_t **error)
+int mdea_number_node_serialize(void *p, struct mdea_emitter *f, int indent, wchar_t **error)
 {
 	double number;
 	mdea_get_number(p, &number, error);
-	fwprintf(f, L"%g", number);
+	if (mdea_emitter_emit_number(f, number, error) != 0)
+		return -1;
 	return 0;
 }
 
-int mdea_string_node_serialize(void *p, FILE *f, int indent, wchar_t **error)
+int mdea_string_node_serialize(void *p, struct mdea_emitter *f, int indent, wchar_t **error)
 {
 	const wchar_t *string;
 	mdea_get_string(p, &string, error);
-	fwprintf(f, L"\"%ls\"", string);
+	if (mdea_emitter_emit_string(f, L"\"", error) != 0)
+		return -1;
+	if (mdea_emitter_emit_string(f, string, error) != 0)
+		return -1;
+	if (mdea_emitter_emit_string(f, L"\"", error) != 0)
+		return -1;
 	return 0;
 }
 
-int mdea_boolean_node_serialize(void *p, FILE *f, int indent, wchar_t **error)
+int mdea_boolean_node_serialize(void *p, struct mdea_emitter *f, int indent, wchar_t **error)
 {
 	int boolean;
 	mdea_get_boolean(p, &boolean, error);
-	fwprintf(f, L"%ls", boolean ? L"true" : L"false");
+	if (mdea_emitter_emit_string(f, boolean ? L"true" : L"false", error) != 0)
+		return -1;
 	return 0;
 }
 
-int mdea_array_node_serialize(void *p, FILE *f, int indent, wchar_t **error)
+int mdea_array_node_serialize(void *p, struct mdea_emitter *f, int indent, wchar_t **error)
 {
 	struct mdea_array *array;
 	mdea_get_array(p, &array, NULL);
 	if (array->size == 0) {
-		fwprintf(f, L"[]");
+		if (mdea_emitter_emit_string(f, L"[]", error) != 0)
+			return -1;
 		return 0;
 	}
 	int is_first = 1;
-	fwprintf(f, L"[\n");
+	if (mdea_emitter_emit_string(f, L"[\n", error) != 0)
+		return -1;
 	for (int i = 0; i < array->size; ++i) {
-		if (is_first)
+		if (is_first) {
 			is_first = 0;
-		else
-			fwprintf(f, L",\n");
-		for (int i = 0; i <= indent; ++i)
-			fwprintf(f, L"  ");
+		} else {
+			if (mdea_emitter_emit_string(f, L",\n", error) != 0)
+				return -1;
+		}
+		for (int i = 0; i <= indent; ++i) {
+			if (mdea_emitter_emit_string(f, L"  ", error) != 0)
+				return -1;
+		}
 		mdea_serialize(array->vals[i], f, indent + 1, error);
 	}
-	fwprintf(f, L"\n");
-	for (int i = 0; i < indent; ++i)
-		fwprintf(f, L"  ");
-	fwprintf(f, L"]");
+	if (mdea_emitter_emit_string(f, L"\n", error) != 0)
+		return -1;
+	for (int i = 0; i < indent; ++i) {
+		if (mdea_emitter_emit_string(f, L"  ", error) != 0)
+			return -1;
+	}
+	if (mdea_emitter_emit_string(f, L"]", error) != 0)
+		return -1;
 	return 0;
 }
 
-int mdea_object_node_serialize(void *p, FILE *f, int indent, wchar_t **error)
+int mdea_object_node_serialize(void *p, struct mdea_emitter *f, int indent, wchar_t **error)
 {
 	struct mdea_object *object;
 	mdea_get_object(p, &object, NULL);
 	if (object->size == 0) {
-		fwprintf(f, L"{}");
+		if (mdea_emitter_emit_string(f, L"{}", error) != 0)
+			return -1;
 		return 0;
 	}
 	int is_first = 1;
-	fwprintf(f, L"{\n");
+	if (mdea_emitter_emit_string(f, L"{\n", error) != 0)
+		return -1;
 	for (int i = 0; i < object->size; ++i) {
-		if (is_first)
+		if (is_first) {
 			is_first = 0;
-		else
-			fwprintf(f, L",\n");
-		for (int i = 0; i <= indent; ++i)
-			fwprintf(f, L"  ");
-		fwprintf(f, L"\"%ls\": ", object->fields[i].key);
+		} else {
+			if (mdea_emitter_emit_string(f, L",\n", error) != 0)
+				return -1;
+		}
+		for (int i = 0; i <= indent; ++i) {
+			if (mdea_emitter_emit_string(f, L"  ", error) != 0)
+				return -1;
+		}
+		if (mdea_emitter_emit_string(f, L"\"", error) != 0)
+			return -1;
+		if (mdea_emitter_emit_string(f, object->fields[i].key, error) != 0)
+			return -1;
+		if (mdea_emitter_emit_string(f, L"\": ", error) != 0)
+			return -1;
 		mdea_serialize(object->fields[i].val, f, indent + 1, error);
 	}
-	fwprintf(f, L"\n");
-	for (int i = 0; i < indent; ++i)
-		fwprintf(f, L"  ");
-	fwprintf(f, L"}");
+	if (mdea_emitter_emit_string(f, L"\n", error) != 0)
+		return -1;
+	for (int i = 0; i < indent; ++i) {
+		if (mdea_emitter_emit_string(f, L"  ", error) != 0)
+			return -1;
+	}
+	if (mdea_emitter_emit_string(f, L"}", error) != 0)
+		return -1;
 	return 0;
 }
 

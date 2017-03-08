@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include <wchar.h>
 
+/*
+ * Token read from a file or string
+ */
 struct mdea_token {
 	enum {
 		MDEA_TOK_NULL,
@@ -20,6 +23,8 @@ struct mdea_token {
 		MDEA_TOK_RCURLY,
 		MDEA_TOK_COMMA,
 		MDEA_TOK_COLON,
+		MDEA_TOK_BREAK,
+		MDEA_TOK_INDENT,
 		MDEA_TOK_END
 	} type;
 	union {
@@ -28,12 +33,11 @@ struct mdea_token {
 	};
 };
 
+/* Destroy existing token */
 static inline void mdea_token_destroy(struct mdea_token *t)
 {
 	if (t->type == MDEA_TOK_STRING)
 		free(t->string);
 }
-
-int mdea_next_token(FILE *file, struct mdea_token *tok, wchar_t **error);
 
 #endif  // MDEA_TOKEN_H_

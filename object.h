@@ -9,17 +9,27 @@
 
 #include "object.h"
 
+/*
+ * Map, indexed by field name
+ */
 struct mdea_object {
+	/* Number of allocated elements */
 	size_t alloc;
+	/* Number of actual elements */
 	size_t size;
-	struct mdea_objectField {
+	/* Allocated data */
+	struct {
+		/* Key for the field */
 		wchar_t *key;
+		/* Value for the field */
 		void *val;
 	} *fields;
 };
 
+/* Forward declaration for function to destroy values */
 extern void mdea_destroy(void *);
 
+/* Initialize object */
 static inline void mdea_object_init(struct mdea_object *data)
 {
 	data->alloc = 0;
@@ -27,6 +37,7 @@ static inline void mdea_object_init(struct mdea_object *data)
 	data->fields = NULL;
 }
 
+/* Deinitialize object */
 static inline void mdea_object_deinit(struct mdea_object *data)
 {
 	if (data->size) {
@@ -38,6 +49,7 @@ static inline void mdea_object_deinit(struct mdea_object *data)
 	}
 }
 
+/* Add field to object */
 static inline int mdea_object_add(struct mdea_object *data, const wchar_t *key, void *val)
 {
 	for (size_t i = 0; i < data->size; ++i) {
@@ -58,6 +70,7 @@ static inline int mdea_object_add(struct mdea_object *data, const wchar_t *key, 
 	return 0;
 }
 
+/* Remove field from object */
 static inline int mdea_object_remove(struct mdea_object *data, const wchar_t *key)
 {
 	for (size_t i = 0; i < data->size; ++i) {
@@ -73,6 +86,7 @@ static inline int mdea_object_remove(struct mdea_object *data, const wchar_t *ke
 	return -1;
 }
 
+/* Get field from object */
 static inline int mdea_object_get(struct mdea_object *data, const wchar_t *key, void **rval)
 {
 	for (size_t i = 0; i < data->size; ++i) {
@@ -84,6 +98,7 @@ static inline int mdea_object_get(struct mdea_object *data, const wchar_t *key, 
 	return -1;
 }
 
+/* Iterate over object fields */
 #define mdea_object_foreach(_k, _v, _o) \
 	for (int _i = 0; (_i != (_o)->size) && (_k = (_o)->fields[_i].key) && (_v = (_o)->fields[_i].val); ++_i)
 

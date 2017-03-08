@@ -8,10 +8,8 @@
 #include "array.h"
 #include "object.h"
 #include "node.h"
-
-int mdea_read(FILE *f, struct mdea_node **node, wchar_t **error);
-int mdea_write(FILE *f, struct mdea_node *node, wchar_t **error);
-int mdea_get(struct mdea_node *root, struct mdea_node **rval, ...);
+#include "parser.h"
+#include "emitter.h"
 
 #endif  // MDEA_H_
 

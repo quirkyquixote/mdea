@@ -4,5 +4,6 @@
 *.log
 tests/array
 tests/object
-tests/parser
+tests/file
+tests/string
 tests/escape

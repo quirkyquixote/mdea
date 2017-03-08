@@ -1,17 +1,27 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#include "token.h"
+#include "file_parser.h"
 
 #include <wctype.h>
 
 #include "error.h"
 
-int mdea_next_token(FILE *file, struct mdea_token *tok, wchar_t **error)
+struct mdea_file_parser {
+	const struct mdea_parser_type *type;
+	FILE *file;
+};
+
+void mdea_file_parser_destroy(void *p)
 {
+}
+
+int mdea_file_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
+{
+	struct mdea_file_parser *t = p;
 	mdea_token_destroy(tok);
 	int c;
 	do
-		c = fgetwc(file);
+		c = fgetwc(t->file);
 	while (iswspace(c));
 	if (c == WEOF) {
 		tok->type = MDEA_TOK_END;
@@ -40,7 +50,7 @@ int mdea_next_token(FILE *file, struct mdea_token *tok, wchar_t **error)
 		wchar_t *buf = NULL;
 		int escaped = 0;
 		for (;;) {
-			c = fgetwc(file);
+			c = fgetwc(t->file);
 			if (c == WEOF) {
 				mdea_error(error, L"Unexpected end of file");
 				return -1;
@@ -66,29 +76,29 @@ int mdea_next_token(FILE *file, struct mdea_token *tok, wchar_t **error)
 			++size;
 		}
 	} else if ((c >= '0' && c <= '9') || c == '.') {
-		ungetwc(c, file);
+		ungetwc(c, t->file);
 		tok->type = MDEA_TOK_NUMBER;
-		fwscanf(file, L"%lf", &tok->number);
+		fwscanf(t->file, L"%lf", &tok->number);
 		return 0;
 	} else if (c == 'n') {
-		if (fgetwc(file) != 'u' || fgetwc(file) != 'l'
-				|| fgetwc(file) != 'l') {
+		if (fgetwc(t->file) != 'u' || fgetwc(t->file) != 'l'
+				|| fgetwc(t->file) != 'l') {
 			mdea_error(error, L"Expected null");
 			return -1;
 		}
 		tok->type = MDEA_TOK_NULL;
 		return 0;
 	} else if (c == 't') {
-		if (fgetwc(file) != 'r' || fgetwc(file) != 'u'
-				|| fgetwc(file) != 'e') {
+		if (fgetwc(t->file) != 'r' || fgetwc(t->file) != 'u'
+				|| fgetwc(t->file) != 'e') {
 			mdea_error(error, L"Expected true");
 			return -1;
 		}
 		tok->type = MDEA_TOK_TRUE;
 		return 0;
 	} else if (c == 'f') {
-		if (fgetwc(file) != 'a' || fgetwc(file) != 'l'
-				|| fgetwc(file) != 's' || fgetwc(file) != 'e') {
+		if (fgetwc(t->file) != 'a' || fgetwc(t->file) != 'l'
+				|| fgetwc(t->file) != 's' || fgetwc(t->file) != 'e') {
 			mdea_error(error, L"Expected false");
 			return -1;
 		}
@@ -101,4 +111,17 @@ int mdea_next_token(FILE *file, struct mdea_token *tok, wchar_t **error)
 			mdea_error(error, L"Unexpected character: \\u%04X", c);
 		return -1;
 	}
+}
+
+const struct mdea_parser_type mdea_file_parser_type = {
+	mdea_file_parser_destroy,
+	mdea_file_parser_next,
+};
+
+struct mdea_parser *mdea_file_parser(FILE *file)
+{
+	struct mdea_file_parser *t = calloc(1, sizeof(*t));
+	t->type = &mdea_file_parser_type;
+	t->file = file;
+	return (void *)t;
 }

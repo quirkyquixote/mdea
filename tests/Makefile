@@ -4,7 +4,8 @@ include ../config.mk
 objs += escape.o
 objs += array.o
 objs += object.o
-objs += parser.o
+objs += file.o
+objs += string.o
 
 bins = $(objs:.o=)
 deps = $(objs:.o=.d)
@@ -24,7 +25,8 @@ clean:
 escape: escape.o ../escape.o ../error.o
 array: array.o
 object: object.o
-parser: parser.o ../mdea.o ../error.o ../token.o ../node.o
+file: file.o ../error.o ../parser.o ../file_parser.o ../file_emitter.o ../node.o
+string: string.o ../error.o ../parser.o ../string_parser.o ../string_emitter.o ../node.o
 
 %.log: % %.in make-always
 	$(QUIET_GEN)./$< < $<.in > $@ 2>&1
