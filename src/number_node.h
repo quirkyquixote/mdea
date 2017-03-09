@@ -6,7 +6,7 @@
 #include "node.h"
 
 /* Create number node */
-struct mdea_node *mdea_number(double number);
+struct mdea_node *mdea_number_node(double number);
 
 #endif  // MDEA_NUMBER_NODE_H_
 

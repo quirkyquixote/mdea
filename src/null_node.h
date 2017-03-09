@@ -6,7 +6,7 @@
 #include "node.h"
 
 /* Create null node */
-struct mdea_node *mdea_null(void);
+struct mdea_node *mdea_null_node(void);
 
 #endif  // MDEA_NULL_NODE_H_
 

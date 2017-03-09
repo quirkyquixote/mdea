@@ -57,7 +57,7 @@ const struct mdea_node_type mdea_null_node_type = {
 	mdea_null_node_get_object,
 };
 
-struct mdea_node *mdea_null(void)
+struct mdea_node *mdea_null_node(void)
 {
 	struct mdea_null_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_null_node_type;

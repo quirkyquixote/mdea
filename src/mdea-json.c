@@ -76,7 +76,7 @@ int test(int argc, char *argv[], wchar_t **error)
 			return -1;
 		struct mdea_node *root;
 		if (node_from_file(argv[4], &root, NULL) != 0)
-			root = mdea_object();
+			root = mdea_object_node();
 		struct mdea_node *node;
 		if (node_from_string(argv[3], &node, error) != 0)
 			return -1;

@@ -105,7 +105,7 @@ int mdea_set(struct mdea_node **root, wchar_t *key, struct mdea_node *val, wchar
 	} else if (tok.type == PATH_TOKEN_INDEX) {
 		struct mdea_array *array;
 		if (*root == NULL)
-			*root = mdea_array();
+			*root = mdea_array_node();
 		if (mdea_get_array(*root, &array, error) != 0)
 			goto cleanup;
 		struct mdea_node *node;
@@ -126,7 +126,7 @@ int mdea_set(struct mdea_node **root, wchar_t *key, struct mdea_node *val, wchar
 	} else if (tok.type == PATH_TOKEN_FIELD) {
 		struct mdea_object *object;
 		if (*root == NULL)
-			*root = mdea_object();
+			*root = mdea_object_node();
 		if (mdea_get_object(*root, &object, error) != 0)
 			goto cleanup;
 		struct mdea_node *node;

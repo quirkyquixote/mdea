@@ -60,7 +60,7 @@ const struct mdea_node_type mdea_number_node_type = {
 	mdea_number_node_get_object,
 };
 
-struct mdea_node *mdea_number(double number)
+struct mdea_node *mdea_number_node(double number)
 {
 	struct mdea_number_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_number_node_type;

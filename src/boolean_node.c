@@ -60,7 +60,7 @@ const struct mdea_node_type mdea_boolean_node_type = {
 	mdea_boolean_node_get_object,
 };
 
-struct mdea_node *mdea_boolean(int boolean)
+struct mdea_node *mdea_boolean_node(int boolean)
 {
 	struct mdea_boolean_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_boolean_node_type;

@@ -90,7 +90,7 @@ const struct mdea_node_type mdea_array_node_type = {
 	mdea_array_node_get_object,
 };
 
-struct mdea_node *mdea_array(void)
+struct mdea_node *mdea_array_node(void)
 {
 	struct mdea_array_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_array_node_type;

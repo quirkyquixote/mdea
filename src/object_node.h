@@ -6,7 +6,7 @@
 #include "node.h"
 
 /* Create object node */
-struct mdea_node *mdea_object(void);
+struct mdea_node *mdea_object_node(void);
 
 #endif  // MDEA_OBJECT_NODE_H_
 

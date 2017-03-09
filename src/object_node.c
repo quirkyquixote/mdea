@@ -96,7 +96,7 @@ const struct mdea_node_type mdea_object_node_type = {
 	mdea_object_node_get_object,
 };
 
-struct mdea_node *mdea_object(void)
+struct mdea_node *mdea_object_node(void)
 {
 	struct mdea_object_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_object_node_type;

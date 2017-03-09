@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 			size_t len = strlen(line + 1) + 1;
 			wchar_t tmp[len];
 			mbstowcs(tmp, line + 1, len);
-			mdea_array_push_back(&array, mdea_string(tmp));
+			mdea_array_push_back(&array, mdea_string_node(tmp));
 		} else if (line[0] == '-') {
 			long key = strtol(line + 1, NULL, 10);
 			mdea_array_erase(&array, key);

@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 			size_t len = strlen(line + 1) + 1;
 			wchar_t tmp[len];
 			mbstowcs(tmp, line + 1, len);
-			mdea_object_insert(&object, tmp, mdea_string(tmp));
+			mdea_object_insert(&object, tmp, mdea_string_node(tmp));
 		} else if (line[0] == '-') {
 			size_t len = strlen(line + 1) + 1;
 			wchar_t tmp[len];
