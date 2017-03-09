@@ -1,6 +1,8 @@
 
 include ../config.mk
 
+ALL_CFLAGS += -I../src
+
 objs += escape.o
 objs += array.o
 objs += object.o
@@ -25,11 +27,11 @@ clean:
 %.log: % %.in make-always
 	$(QUIET_GEN)./$< < $<.in > $@ 2>&1
 
-escape: escape.o ../libmdea.a
-array: array.o ../libmdea.a
-object: object.o ../libmdea.a
-file: file.o ../libmdea.a
-string: string.o ../libmdea.a
+escape: escape.o ../src/libmdea.a
+array: array.o ../src/libmdea.a
+object: object.o ../src/libmdea.a
+file: file.o ../src/libmdea.a
+string: string.o ../src/libmdea.a
 
 .PHONY: make-always
 make-always:

@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <wchar.h>
 
-#include "../mdea.h"
+#include "mdea.h"
 
 void print_array(struct mdea_array *array)
 {

@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "../mdea.h"
+#include "mdea.h"
 
 int main(int argc, char *argv[])
 {

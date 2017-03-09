@@ -2,9 +2,7 @@
 
 #include <stdio.h>
 
-#include "../mdea.h"
-#include "../string_parser.h"
-#include "../string_emitter.h"
+#include "mdea.h"
 
 int main(int argc, char *argv[])
 {

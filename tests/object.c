@@ -1,6 +1,6 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#include "../mdea.h"
+#include "mdea.h"
 
 void print_object(struct mdea_object *object)
 {

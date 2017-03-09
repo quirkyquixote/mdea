@@ -2,9 +2,7 @@
 
 #include <stdio.h>
 
-#include "../mdea.h"
-#include "../file_parser.h"
-#include "../file_emitter.h"
+#include "mdea.h"
 
 int main(int argc, char *argv[])
 {
