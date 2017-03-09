@@ -71,14 +71,18 @@ int mdea_get(struct mdea_node *root, wchar_t *key, struct mdea_node **rval, wcha
 			struct mdea_array *array;
 			if (mdea_get_array(*rval, &array, error) != 0)
 				break;
-			if (mdea_array_get(array, tok.index, rval) != 0)
+			if (mdea_array_get(array, tok.index, rval) != 0) {
+				mdea_error(error, L"No such index: %d", tok.index);
 				break;
+			}
 		} else if (tok.type == PATH_TOKEN_FIELD) {
 			struct mdea_object *object;
 			if (mdea_get_object(*rval, &object, error) != 0)
 				break;
-			if (mdea_object_get(object, tok.field, rval) != 0)
+			if (mdea_object_get(object, tok.field, rval) != 0) {
+				mdea_error(error, L"No such field: %ls", tok.field);
 				break;
+			}
 		} else {
 			mdea_error(error, L"Expected number or string");
 			break;
@@ -106,7 +110,7 @@ int mdea_set(struct mdea_node **root, wchar_t *key, struct mdea_node *val, wchar
 			goto cleanup;
 		struct mdea_node *node;
 		if (mdea_array_get(array, tok.index, &node) == 0) {
-			if (mdea_set(&node, key, val, error) != 0) {
+			if (mdea_set(&node, key, val, error) == 0) {
 				ret = 0;
 				goto cleanup;
 			}
@@ -127,7 +131,7 @@ int mdea_set(struct mdea_node **root, wchar_t *key, struct mdea_node *val, wchar
 			goto cleanup;
 		struct mdea_node *node;
 		if (mdea_object_get(object, tok.field, &node) == 0) {
-			if (mdea_set(&node, key, val, error) != 0) {
+			if (mdea_set(&node, key, val, error) == 0) {
 				ret = 0;
 				goto cleanup;
 			}

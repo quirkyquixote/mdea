@@ -22,19 +22,24 @@ deps = $(objs:.o=.d)
 libs = libmdea.so libmdea.a
 install_libs = $(addprefix $(libdir)/,$(libs))
 
+bins = mdea-json
+install_bins = $(addprefix $(bindir)/,$(bins))
+
 .PHONY: all
-all: $(libs)
+all: $(libs) $(bins)
 
 .PHONY: clean
 clean:
 	$(RM) $(objs)
 	$(RM) $(libs)
 	$(RM) $(deps)
+	$(RM) $(bins)
 
 .PHONY: install
 install: all $(install_libs)
 
 libmdea.so: $(objs)
 libmdea.a: $(objs)
+mdea-json: mdea-json.o libmdea.a
 
 -include $(deps)

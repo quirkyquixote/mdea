@@ -70,7 +70,7 @@ static inline int mdea_array_insert(struct mdea_array *a, size_t i, struct mdea_
 		a->vals = realloc(a->vals, sizeof(*a->vals) * a->alloc);
 	}
 	memmove(a->vals + i + 1, a->vals + i,
-			sizeof(*a->vals) * (a->size - i - 1));
+			sizeof(*a->vals) * (a->size - i));
 	a->vals[i] = val;
 	++a->size;
 	return 0;
