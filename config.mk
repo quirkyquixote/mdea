@@ -6,6 +6,7 @@ RM = rm -f
 version = 1.0
 prefix = /usr/local
 libdir = $(prefix)/lib
+bindir = $(prefix)/bin
 
 CPPFLAGS =
 
@@ -43,3 +44,6 @@ $(DESTDIR)$(libdir)/%.so: %.so
 	$(QUIET_INSTALL)$(INSTALL) $< $@.$(version)
 	@cd $(DESTDIR)$(libdir) && ln -s -f $<.$(version) $<
 
+$(DESTDIR)$(bindir)/%: %
+	@$(INSTALL) -d $(@D)
+	$(QUIET_INSTALL)$(INSTALL) $< $@

@@ -9,16 +9,21 @@
 struct mdea_string_parser {
 	const struct mdea_parser_type *type;
 	const wchar_t *cur;
+	size_t alloc;
+	size_t size;
+	wchar_t *buf;
 };
 
 void mdea_string_parser_destroy(void *p)
 {
+	struct mdea_string_parser *t = p;
+	if (t->buf)
+		free(t->buf);
 }
 
 int mdea_string_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
 {
 	struct mdea_string_parser *t = p;
-	mdea_token_destroy(tok);
 	while (iswspace(*t->cur))
 		++t->cur;
 	if (*t->cur == WEOF) {
@@ -50,9 +55,7 @@ int mdea_string_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
 		++t->cur;
 		return 0;
 	} else if (*t->cur == '"') {
-		size_t alloc = 0;
-		size_t size = 0;
-		wchar_t *buf = NULL;
+		t->size = 0;
 		int escaped = 0;
 		for (;;) {
 			++t->cur;
@@ -66,18 +69,18 @@ int mdea_string_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
 			} else {
 				escaped = 0;
 			}
-			if (size == alloc) {
-				alloc = alloc ? alloc * 2 : 2;
-				buf = realloc(buf, sizeof(*buf) * alloc);
+			if (t->size == t->alloc) {
+				t->alloc = t->alloc ? t->alloc * 2 : 2;
+				t->buf = realloc(t->buf, sizeof(*t->buf) * t->alloc);
 			}
-			buf[size] = *t->cur == '"' ? 0 : *t->cur;
-			if (buf[size] == 0) {
+			t->buf[t->size] = *t->cur == '"' ? 0 : *t->cur;
+			if (t->buf[t->size] == 0) {
 				tok->type = MDEA_TOK_STRING;
-				tok->string = buf;
+				tok->string = t->buf;
 				++t->cur;
 				return 0;
 			}
-			++size;
+			++t->size;
 		}
 	} else if ((*t->cur >= '0' && *t->cur <= '9') || *t->cur == '.') {
 		int tmp;
@@ -129,5 +132,8 @@ struct mdea_parser *mdea_string_parser(const wchar_t *string)
 	struct mdea_string_parser *t = calloc(1, sizeof(*t));
 	t->type = &mdea_string_parser_type;
 	t->cur = string;
+	t->alloc = 0;
+	t->size = 0;
+	t->buf = NULL;
 	return (void *)t;
 }

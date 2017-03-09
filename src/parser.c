@@ -62,23 +62,24 @@ int mdea_parse(struct mdea_parser *t, struct mdea_token *tok, struct mdea_node *
 		struct mdea_object *object;
 		mdea_get_object(*rval, &object, NULL);
 		for (;;) {
-			struct mdea_token tok2;
 			struct mdea_node *tmp;
 			if (tok->type != MDEA_TOK_STRING) {
 				mdea_error(error, L"Expected string");
 				return -1;
 			}
-			if (mdea_parser_parse(t, &tok2, error) != 0)
+			wchar_t key[wcslen(tok->string) + 1];
+			wcscpy(key, tok->string);
+			if (mdea_parser_parse(t, tok, error) != 0)
 				return -1;
-			if (tok2.type != MDEA_TOK_COLON) {
+			if (tok->type != MDEA_TOK_COLON) {
 				mdea_error(error, L"Expected ':'");
 				return -1;
 			}
-			if (mdea_parser_parse(t, &tok2, error) != 0)
+			if (mdea_parser_parse(t, tok, error) != 0)
 				return -1;
-			if (mdea_parse(t, &tok2, &tmp, error) != 0)
+			if (mdea_parse(t, tok, &tmp, error) != 0)
 				return -1;
-			mdea_object_insert(object, tok->string, tmp);
+			mdea_object_insert(object, key, tmp);
 			if (mdea_parser_parse(t, tok, error) != 0)
 				return -1;
 			if (tok->type == MDEA_TOK_RCURLY)
@@ -102,7 +103,6 @@ int mdea_read(struct mdea_parser *t, struct mdea_node **rval, wchar_t **error)
 	if (mdea_parser_parse(t, &tok, error) == 0) {
 		if (mdea_parse(t, &tok, rval, error) == 0)
 			ret = 0;
-		mdea_token_destroy(&tok);
 	}
 	return ret;
 }

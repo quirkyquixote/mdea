@@ -9,16 +9,21 @@
 struct mdea_file_parser {
 	const struct mdea_parser_type *type;
 	FILE *file;
+	size_t alloc;
+	size_t size;
+	wchar_t *buf;
 };
 
 void mdea_file_parser_destroy(void *p)
 {
+	struct mdea_file_parser *f = p;
+	if (f->buf)
+		free(f->buf);
 }
 
 int mdea_file_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
 {
 	struct mdea_file_parser *t = p;
-	mdea_token_destroy(tok);
 	int c;
 	do
 		c = fgetwc(t->file);
@@ -45,9 +50,7 @@ int mdea_file_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
 		tok->type = MDEA_TOK_COLON;
 		return 0;
 	} else if (c == '"') {
-		size_t alloc = 0;
-		size_t size = 0;
-		wchar_t *buf = NULL;
+		t->size = 0;
 		int escaped = 0;
 		for (;;) {
 			c = fgetwc(t->file);
@@ -63,17 +66,17 @@ int mdea_file_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
 			} else {
 				escaped = 0;
 			}
-			if (size == alloc) {
-				alloc = alloc ? alloc * 2 : 2;
-				buf = realloc(buf, sizeof(*buf) * alloc);
+			if (t->size == t->alloc) {
+				t->alloc = t->alloc ? t->alloc * 2 : 2;
+				t->buf = realloc(t->buf, sizeof(*t->buf) * t->alloc);
 			}
-			buf[size] = c;
+			t->buf[t->size] = c;
 			if (c == 0) {
 				tok->type = MDEA_TOK_STRING;
-				tok->string = buf;
+				tok->string = t->buf;
 				return 0;
 			}
-			++size;
+			++t->size;
 		}
 	} else if ((c >= '0' && c <= '9') || c == '.') {
 		ungetwc(c, t->file);
@@ -123,5 +126,8 @@ struct mdea_parser *mdea_file_parser(FILE *file)
 	struct mdea_file_parser *t = calloc(1, sizeof(*t));
 	t->type = &mdea_file_parser_type;
 	t->file = file;
+	t->alloc = 0;
+	t->size = 0;
+	t->buf = NULL;
 	return (void *)t;
 }

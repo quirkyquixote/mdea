@@ -33,11 +33,4 @@ struct mdea_token {
 	};
 };
 
-/* Destroy existing token */
-static inline void mdea_token_destroy(struct mdea_token *t)
-{
-	if (t->type == MDEA_TOK_STRING)
-		free(t->string);
-}
-
 #endif  // MDEA_TOKEN_H_
