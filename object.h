@@ -9,6 +9,9 @@
 
 #include "object.h"
 
+/* Forward declaration of mdea_node */
+struct mdea_node;
+
 /*
  * Map, indexed by field name
  */
@@ -17,69 +20,87 @@ struct mdea_object {
 	size_t alloc;
 	/* Number of actual elements */
 	size_t size;
-	/* Allocated data */
+	/* Allocated o */
 	struct {
 		/* Key for the field */
 		wchar_t *key;
 		/* Value for the field */
-		void *val;
+		struct mdea_node *val;
 	} *fields;
 };
 
 /* Forward declaration for function to destroy values */
-extern void mdea_destroy(void *);
+extern void mdea_destroy(struct mdea_node *);
 
 /* Initialize object */
-static inline void mdea_object_init(struct mdea_object *data)
+static inline void mdea_object_init(struct mdea_object *o)
 {
-	data->alloc = 0;
-	data->size = 0;
-	data->fields = NULL;
+	o->alloc = 0;
+	o->size = 0;
+	o->fields = NULL;
+}
+
+/* Clear the contents */
+static inline void mdea_object_clear(struct mdea_object *o)
+{
+	for (size_t i = 0; i < o->size; ++i) {
+		free(o->fields[i].key);
+		mdea_destroy(o->fields[i].val);
+	}
+	o->size = 0;
 }
 
 /* Deinitialize object */
-static inline void mdea_object_deinit(struct mdea_object *data)
+static inline void mdea_object_deinit(struct mdea_object *o)
 {
-	if (data->size) {
-		for (size_t i = 0; i < data->size; ++i) {
-			free(data->fields[i].key);
-			mdea_destroy(data->fields[i].val);
-		}
-		free(data->fields);
-	}
+	mdea_object_clear(o);
+	if (o->fields)
+		free(o->fields);
+}
+
+/* Checks whether object is empty */
+static inline int mdea_object_empty(struct mdea_object *o)
+{
+	return o->size == 0;
+}
+
+/* Return number of fields */
+static inline size_t mdea_object_size(struct mdea_object *o)
+{
+	return o->size;
 }
 
 /* Add field to object */
-static inline int mdea_object_add(struct mdea_object *data, const wchar_t *key, void *val)
+static inline int mdea_object_insert(struct mdea_object *o, const wchar_t *key, struct mdea_node *val)
 {
-	for (size_t i = 0; i < data->size; ++i) {
-		if (wcscmp(key, data->fields[i].key) == 0) {
-			mdea_destroy(data->fields[i].val);
-			data->fields[i].val = val;
+	for (size_t i = 0; i < o->size; ++i) {
+		if (wcscmp(key, o->fields[i].key) == 0) {
+			mdea_destroy(o->fields[i].val);
+			o->fields[i].val = val;
 			return 0;
 		}
 	}
-	if (data->alloc == data->size) {
-		data->alloc = data->alloc ? data->alloc * 2 : 2;
-		data->fields = realloc(data->fields,
-				sizeof(*data->fields) * data->alloc);
+	if (o->alloc == o->size) {
+		o->alloc = o->alloc ? o->alloc * 2 : 2;
+		o->fields = realloc(o->fields,
+				sizeof(*o->fields) * o->alloc);
 	}
-	data->fields[data->size].key = wcsdup(key);
-	data->fields[data->size].val = val;
-	++data->size;
+	o->fields[o->size].key = wcsdup(key);
+	o->fields[o->size].val = val;
+	++o->size;
 	return 0;
 }
 
 /* Remove field from object */
-static inline int mdea_object_remove(struct mdea_object *data, const wchar_t *key)
+static inline int mdea_object_erase(struct mdea_object *o, const wchar_t *key)
 {
-	for (size_t i = 0; i < data->size; ++i) {
-		if (wcscmp(key, data->fields[i].key) == 0) {
-			free(data->fields[i].key);
-			mdea_destroy(data->fields[i].val);
-			memmove(data->fields + i, data->fields + i + 1,
-					sizeof(*data->fields) * (data->size - i - 1));
-			--data->size;
+	for (size_t i = 0; i < o->size; ++i) {
+		if (wcscmp(key, o->fields[i].key) == 0) {
+			free(o->fields[i].key);
+			mdea_destroy(o->fields[i].val);
+			memmove(o->fields + i, o->fields + i + 1,
+					sizeof(*o->fields) * (o->size - i - 1));
+			--o->size;
 			return 0;
 		}
 	}
@@ -87,11 +108,11 @@ static inline int mdea_object_remove(struct mdea_object *data, const wchar_t *ke
 }
 
 /* Get field from object */
-static inline int mdea_object_get(struct mdea_object *data, const wchar_t *key, void **rval)
+static inline int mdea_object_get(struct mdea_object *o, const wchar_t *key, struct mdea_node **rval)
 {
-	for (size_t i = 0; i < data->size; ++i) {
-		if (wcscmp(key, data->fields[i].key) == 0) {
-			*rval = data->fields[i].val;
+	for (size_t i = 0; i < o->size; ++i) {
+		if (wcscmp(key, o->fields[i].key) == 0) {
+			*rval = o->fields[i].val;
 			return 0;
 		}
 	}

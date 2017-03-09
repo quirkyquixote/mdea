@@ -2,9 +2,8 @@
 
 #include "node.h"
 
-void mdea_destroy(void *ptr)
+void mdea_destroy(struct mdea_node *node)
 {
-	struct mdea_node *node = ptr;
 	node->type->destroy(node);
 	free(node);
 }

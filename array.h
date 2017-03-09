@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Forward declaration for mdea_node */
+struct mdea_node;
+
 /* 
  * Self-allocating array
  */
@@ -15,76 +18,104 @@ struct mdea_array {
 	/* Number of actual elements */
 	size_t size;
 	/* Pointer to data */
-	void **vals;
+	struct mdea_node **vals;
 };
 
 /* Forward declaration of function to destroy nodes */
-extern void mdea_destroy(void *);
+extern void mdea_destroy(struct mdea_node *);
 
 /* Initialize array */
-static inline void mdea_array_init(struct mdea_array *data)
+static inline void mdea_array_init(struct mdea_array *a)
 {
-	data->alloc = 0;
-	data->size = 0;
-	data->vals = NULL;
+	a->alloc = 0;
+	a->size = 0;
+	a->vals = NULL;
+}
+
+/* Clears the contents */
+static inline void mdea_array_clear(struct mdea_array *a)
+{
+	for (size_t i = 0; i < a->size; ++i)
+		mdea_destroy(a->vals[i]);
+	a->size = 0;
 }
 
 /* Deinitialize array */
-static inline void mdea_array_deinit(struct mdea_array *data)
+static inline void mdea_array_deinit(struct mdea_array *a)
 {
-	if (data->size) {
-		for (size_t i = 0; i < data->size; ++i)
-			mdea_destroy(data->vals[i]);
-		free(data->vals);
-	}
+	mdea_array_clear(a);
+	if (a->vals)
+		free(a->vals);
 }
 
-/* Add element to the end of array */
-static inline int mdea_array_add(struct mdea_array *data, void *val)
+/* Return 1 if empty, 0 otherwise */
+static inline int mdea_array_empty(struct mdea_array *array)
 {
-	if (data->alloc == data->size) {
-		data->alloc = data->alloc ? data->alloc * 2 : 2;
-		data->vals = realloc(data->vals, sizeof(*data->vals) * data->alloc);
+	return array->size == 0;
+}
+
+/* Return number of elements */
+static inline size_t mdea_array_size(struct mdea_array *array)
+{
+	return array->size;
+}
+
+/* Insert element */
+static inline int mdea_array_insert(struct mdea_array *a, size_t i, struct mdea_node *val)
+{
+	if (i > a->size)
+		return -1;
+	if (a->alloc == a->size) {
+		a->alloc = a->alloc ? a->alloc * 2 : 2;
+		a->vals = realloc(a->vals, sizeof(*a->vals) * a->alloc);
 	}
-	data->vals[data->size] = val;
-	++data->size;
+	memmove(a->vals + i + 1, a->vals + i,
+			sizeof(*a->vals) * (a->size - i - 1));
+	a->vals[i] = val;
+	++a->size;
 	return 0;
 }
 
-/* Remove element from array */
-static inline int mdea_array_remove(struct mdea_array *data, size_t i)
+/* Remove element */
+static inline int mdea_array_erase(struct mdea_array *a, size_t i)
 {
-	if (i >= data->size)
+	if (i >= a->size)
 		return -1;
-	mdea_destroy(data->vals[i]);
-	memmove(data->vals + i, data->vals + i + 1,
-			sizeof(*data->vals) * (data->size - i - 1));
-	--data->size;
+	mdea_destroy(a->vals[i]);
+	memmove(a->vals + i, a->vals + i + 1,
+			sizeof(*a->vals) * (a->size - i - 1));
+	--a->size;
+	return 0;
+}
+
+/* Add element to the end */
+static inline int mdea_array_push_back(struct mdea_array *a, struct mdea_node *val)
+{
+	if (a->alloc == a->size) {
+		a->alloc = a->alloc ? a->alloc * 2 : 2;
+		a->vals = realloc(a->vals, sizeof(*a->vals) * a->alloc);
+	}
+	a->vals[a->size] = val;
+	++a->size;
+	return 0;
+}
+
+/* Remove element from the end */
+static inline int mdea_array_pop_back(struct mdea_array *a)
+{
+	if (a->size == 0)
+		return -1;
+	--a->size;
+	mdea_destroy(a->vals[a->size]);
 	return 0;
 }
 
 /* Get element from array */
-static inline int mdea_array_get(struct mdea_array *data, size_t key, void **rval)
+static inline int mdea_array_get(struct mdea_array *a, size_t key, struct mdea_node **rval)
 {
-	if (key >= data->size)
+	if (key >= a->size)
 		return -1;
-	*rval = data->vals[key];
-	return 0;
-}
-
-/* Set element in array */
-static inline int mdea_array_set(struct mdea_array *data, size_t key, void *val)
-{
-	if (key >= data->alloc) {
-		while (key >= data->alloc)
-			data->alloc = data->alloc ? data->alloc * 2 : 2;
-		data->vals = realloc(data->vals, sizeof(*data->vals) * data->alloc);
-	}
-	if (key < data->size)
-		mdea_destroy(data->vals[key]);
-	else
-		data->size = key + 1;
-	data->vals[key] = val;
+	*rval = a->vals[key];
 	return 0;
 }
 

@@ -3,20 +3,16 @@
 #include <stdio.h>
 #include <wchar.h>
 
-#include "../array.h"
-
-void mdea_destroy(void *ptr)
-{
-	free(ptr);
-}
+#include "../mdea.h"
 
 void print_array(struct mdea_array *array)
 {
-	const wchar_t *iter;
-
+	struct mdea_node *iter;
+	const wchar_t *string;
 	printf("%zu elements:\n", array->size);
 	mdea_array_foreach(iter, array) {
-		printf("%ls\n", iter);
+		mdea_get_string(iter, &string, NULL);
+		printf("%ls\n", string);
 	}
 }
 
@@ -32,13 +28,12 @@ int main(int argc, char *argv[])
 			size_t len = strlen(line + 1) + 1;
 			wchar_t tmp[len];
 			mbstowcs(tmp, line + 1, len);
-			mdea_array_add(&array, wcsdup(tmp));
+			mdea_array_push_back(&array, mdea_string(tmp));
 		} else if (line[0] == '-') {
 			long key = strtol(line + 1, NULL, 10);
-			mdea_array_remove(&array, key);
+			mdea_array_erase(&array, key);
 		} else if (strcmp(line, "x") == 0) {
-			mdea_array_deinit(&array);
-			mdea_array_init(&array);
+			mdea_array_clear(&array);
 		} else {
 			fprintf(stderr, "ERROR: bad command: %s\n", line);
 			return -1;

@@ -71,13 +71,13 @@ int mdea_get(struct mdea_node *root, wchar_t *key, struct mdea_node **rval, wcha
 			struct mdea_array *array;
 			if (mdea_get_array(*rval, &array, error) != 0)
 				break;
-			if (mdea_array_get(array, tok.index, (void **)rval) != 0)
+			if (mdea_array_get(array, tok.index, rval) != 0)
 				break;
 		} else if (tok.type == PATH_TOKEN_FIELD) {
 			struct mdea_object *object;
 			if (mdea_get_object(*rval, &object, error) != 0)
 				break;
-			if (mdea_object_get(object, tok.field, (void **)rval) != 0)
+			if (mdea_object_get(object, tok.field, rval) != 0)
 				break;
 		} else {
 			mdea_error(error, L"Expected number or string");
@@ -105,7 +105,7 @@ int mdea_set(struct mdea_node **root, wchar_t *key, struct mdea_node *val, wchar
 		if (mdea_get_array(*root, &array, error) != 0)
 			goto cleanup;
 		struct mdea_node *node;
-		if (mdea_array_get(array, tok.index, (void **)&node) == 0) {
+		if (mdea_array_get(array, tok.index, &node) == 0) {
 			if (mdea_set(&node, key, val, error) != 0) {
 				ret = 0;
 				goto cleanup;
@@ -114,7 +114,10 @@ int mdea_set(struct mdea_node **root, wchar_t *key, struct mdea_node *val, wchar
 		node = NULL;
 		if (mdea_set(&node, key, val, error) != 0)
 			goto cleanup;
-		mdea_array_set(array, tok.index, node);
+		if (mdea_array_insert(array, tok.index, node) != 0) {
+			mdea_error(error, L"Array accessed out of bounds");
+			goto cleanup;
+		}
 		ret = 0;
 	} else if (tok.type == PATH_TOKEN_FIELD) {
 		struct mdea_object *object;
@@ -123,7 +126,7 @@ int mdea_set(struct mdea_node **root, wchar_t *key, struct mdea_node *val, wchar
 		if (mdea_get_object(*root, &object, error) != 0)
 			goto cleanup;
 		struct mdea_node *node;
-		if (mdea_object_get(object, tok.field, (void **)&node) == 0) {
+		if (mdea_object_get(object, tok.field, &node) == 0) {
 			if (mdea_set(&node, key, val, error) != 0) {
 				ret = 0;
 				goto cleanup;
@@ -132,7 +135,7 @@ int mdea_set(struct mdea_node **root, wchar_t *key, struct mdea_node *val, wchar
 		node = NULL;
 		if (mdea_set(&node, key, val, error) != 0)
 			goto cleanup;
-		mdea_object_add(object, tok.field, node);
+		mdea_object_insert(object, tok.field, node);
 		ret = 0;
 	} else {
 		mdea_error(error, L"Expected number or string");

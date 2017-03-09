@@ -41,7 +41,7 @@ int mdea_parse(struct mdea_parser *t, struct mdea_token *tok, struct mdea_node *
 			struct mdea_node *tmp;
 			if (mdea_parse(t, tok, &tmp, error) != 0)
 				return -1;
-			mdea_array_add(array, tmp);
+			mdea_array_push_back(array, tmp);
 			if (mdea_parser_parse(t, tok, error) != 0)
 				return -1;
 			if (tok->type == MDEA_TOK_RBRACKET)
@@ -78,7 +78,7 @@ int mdea_parse(struct mdea_parser *t, struct mdea_token *tok, struct mdea_node *
 				return -1;
 			if (mdea_parse(t, &tok2, &tmp, error) != 0)
 				return -1;
-			mdea_object_add(object, tok->string, tmp);
+			mdea_object_insert(object, tok->string, tmp);
 			if (mdea_parser_parse(t, tok, error) != 0)
 				return -1;
 			if (tok->type == MDEA_TOK_RCURLY)
