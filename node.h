@@ -36,19 +36,6 @@ struct mdea_node {
 	const struct mdea_node_type *type;
 };
 
-/* Create null node */
-struct mdea_node *mdea_null(void);
-/* Create number node */
-struct mdea_node *mdea_number(double number);
-/* Create string node */
-struct mdea_node *mdea_string(const wchar_t *string);
-/* Create boolean node */
-struct mdea_node *mdea_boolean(int boolean);
-/* Create array node */
-struct mdea_node *mdea_array(void);
-/* Create object node */
-struct mdea_node *mdea_object(void);
-
 /* Serialize a node */
 static inline int mdea_serialize(struct mdea_node *node, struct mdea_emitter *e, int indent, wchar_t **error)
 {

@@ -2,6 +2,13 @@
 
 #include "parser.h"
 
+#include "null_node.h"
+#include "number_node.h"
+#include "string_node.h"
+#include "boolean_node.h"
+#include "array_node.h"
+#include "object_node.h"
+
 int mdea_parse(struct mdea_parser *t, struct mdea_token *tok, struct mdea_node **rval, wchar_t **error)
 {
 	if (tok->type == MDEA_TOK_END) {

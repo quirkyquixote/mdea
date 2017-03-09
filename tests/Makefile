@@ -22,14 +22,14 @@ clean:
 	$(RM) $(deps)
 	$(RM) $(logs)
 
-escape: escape.o ../escape.o ../error.o
-array: array.o
-object: object.o
-file: file.o ../error.o ../parser.o ../file_parser.o ../file_emitter.o ../node.o
-string: string.o ../error.o ../parser.o ../string_parser.o ../string_emitter.o ../node.o
-
 %.log: % %.in make-always
 	$(QUIET_GEN)./$< < $<.in > $@ 2>&1
+
+escape: escape.o ../libmdea.a
+array: array.o ../libmdea.a
+object: object.o ../libmdea.a
+file: file.o ../libmdea.a
+string: string.o ../libmdea.a
 
 .PHONY: make-always
 make-always:
