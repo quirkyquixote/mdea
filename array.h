@@ -80,7 +80,9 @@ static inline int mdea_array_set(struct mdea_array *data, size_t key, void *val)
 			data->alloc = data->alloc ? data->alloc * 2 : 2;
 		data->vals = realloc(data->vals, sizeof(*data->vals) * data->alloc);
 	}
-	if (key >= data->size)
+	if (key < data->size)
+		mdea_destroy(data->vals[key]);
+	else
 		data->size = key + 1;
 	data->vals[key] = val;
 	return 0;
