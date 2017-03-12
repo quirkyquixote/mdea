@@ -12,7 +12,7 @@ void mdea_null_node_destroy(void *p)
 
 int mdea_null_node_serialize(void *p, struct mdea_emitter *e, int indent, wchar_t **error)
 {
-	if (mdea_emitter_emit_string(e, L"null", error) != 0)
+	if (mdea_emitter_emit(e, mdea_null_token, error) != 0)
 		return -1;
 	return 0;
 }

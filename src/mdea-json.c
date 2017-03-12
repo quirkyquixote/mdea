@@ -1,4 +1,4 @@
-/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
+
 
 #include <wctype.h>
 
@@ -11,8 +11,10 @@ int node_from_file(const char *path, struct mdea_node **node, wchar_t **error)
 	FILE *file = fopen(path, "r");
 	if (file != NULL) {
 		struct mdea_parser *p = mdea_file_parser(file);
-		ret = mdea_read(p, node, error);
+		struct mdea_emitter *e = mdea_node_emitter(node);
+		ret = mdea_parse(p, e, error);
 		mdea_parser_destroy(p);
+		mdea_emitter_destroy(e);
 		fclose(file);
 	} else {
 		perror(path);
@@ -24,14 +26,27 @@ int node_from_string(const char *string, struct mdea_node **node, wchar_t **erro
 {
 	size_t len = strlen(string) + 3;
 	wchar_t tmp[len];
-	struct mdea_parser *p;
 	swprintf(tmp, len, L"%s", string);
-	p = mdea_string_parser(tmp);
-	if (mdea_read(p, node, NULL) == 0)
-		return 0;
+	{
+		struct mdea_parser *p = mdea_string_parser(tmp);
+		struct mdea_emitter *e = mdea_node_emitter(node);
+		int ret = mdea_parse(p, e, NULL);
+		mdea_parser_destroy(p);
+		mdea_emitter_destroy(e);
+		if (ret == 0)
+			return 0;
+	}
 	swprintf(tmp, len, L"\"%s\"", string);
-	p = mdea_string_parser(tmp);
-	return mdea_read(p, node, error);
+	{
+		struct mdea_parser *p = mdea_string_parser(tmp);
+		struct mdea_emitter *e = mdea_node_emitter(node);
+		int ret = mdea_parse(p, e, error);
+		mdea_parser_destroy(p);
+		mdea_emitter_destroy(e);
+		if (ret == 0)
+			return 0;
+	}
+	return -1;
 }
 
 int node_to_file(const char *path, struct mdea_node *node, wchar_t **error)
@@ -39,8 +54,10 @@ int node_to_file(const char *path, struct mdea_node *node, wchar_t **error)
 	int ret = -1;
 	FILE *file = fopen(path, "w");
 	if (file != NULL) {
+		struct mdea_parser *p = mdea_node_parser(node);
 		struct mdea_emitter *e = mdea_file_emitter(file);
 		ret = mdea_write(e, node, error);
+		mdea_parser_destroy(p);
 		mdea_emitter_destroy(e);
 		fclose(file);
 	} else {

@@ -14,7 +14,7 @@ void mdea_boolean_node_destroy(void *p)
 int mdea_boolean_node_serialize(void *p, struct mdea_emitter *e, int indent, wchar_t **error)
 {
 	struct mdea_boolean_node *n = p;
-	if (mdea_emitter_emit_string(e, n->boolean ? L"true" : L"false", error) != 0)
+	if (mdea_emitter_emit(e, n->boolean ? mdea_true_token : mdea_false_token, error) != 0)
 		return -1;
 	return 0;
 }

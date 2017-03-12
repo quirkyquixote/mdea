@@ -13,8 +13,10 @@
 #include "object_node.h"
 #include "file_parser.h"
 #include "string_parser.h"
+#include "node_parser.h"
 #include "file_emitter.h"
 #include "string_emitter.h"
+#include "node_emitter.h"
 
 int mdea_get(struct mdea_node *root, wchar_t *key, struct mdea_node **rval, wchar_t **error);
 int mdea_set(struct mdea_node **root, wchar_t *key, struct mdea_node *val, wchar_t **error);

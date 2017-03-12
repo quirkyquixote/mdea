@@ -14,7 +14,7 @@ void mdea_number_node_destroy(void *p)
 int mdea_number_node_serialize(void *p, struct mdea_emitter *e, int indent, wchar_t **error)
 {
 	struct mdea_number_node *n = p;
-	if (mdea_emitter_emit_number(e, n->number, error) != 0)
+	if (mdea_emitter_emit(e, mdea_number_token(n->number), error) != 0)
 		return -1;
 	return 0;
 }

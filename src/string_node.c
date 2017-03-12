@@ -16,11 +16,7 @@ void mdea_string_node_destroy(void *p)
 int mdea_string_node_serialize(void *p, struct mdea_emitter *e, int indent, wchar_t **error)
 {
 	struct mdea_string_node *n = p;
-	if (mdea_emitter_emit_string(e, L"\"", error) != 0)
-		return -1;
-	if (mdea_emitter_emit_string(e, n->string, error) != 0)
-		return -1;
-	if (mdea_emitter_emit_string(e, L"\"", error) != 0)
+	if (mdea_emitter_emit(e, mdea_string_token(n->string), error) != 0)
 		return -1;
 	return 0;
 }

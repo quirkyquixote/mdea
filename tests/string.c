@@ -6,9 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-	struct mdea_node *root;
 	wchar_t *error;
-
 	size_t alloc = 0;
 	size_t len = 0;
 	wchar_t *buf = NULL;
@@ -25,15 +23,12 @@ int main(int argc, char *argv[])
 	}
 	buf[len] = 0;
 	struct mdea_parser *t = mdea_string_parser(buf);
-	if (mdea_read(t, &root, &error) != 0)
-		fwprintf(stderr, L"ERROR: %ls\n", error);
-	mdea_parser_destroy(t);
-
 	struct mdea_emitter *e = mdea_string_emitter(buf, len);
-	if (mdea_write(e, root, &error) != 0)
+	if (mdea_parse(t, e, &error) != 0)
 		fwprintf(stderr, L"ERROR: %ls\n", error);
 	else
 		fwprintf(stdout, L"%ls", buf);
+	mdea_parser_destroy(t);
 	mdea_emitter_destroy(e);
 }
 

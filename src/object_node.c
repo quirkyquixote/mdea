@@ -17,40 +17,21 @@ int mdea_object_node_serialize(void *p, struct mdea_emitter *e, int indent, wcha
 {
 	struct mdea_object *object;
 	mdea_get_object(p, &object, NULL);
-	if (object->size == 0) {
-		if (mdea_emitter_emit_string(e, L"{}", error) != 0)
-			return -1;
-		return 0;
-	}
 	int is_first = 1;
-	if (mdea_emitter_emit_string(e, L"{\n", error) != 0)
+	if (mdea_emitter_emit(e, mdea_lcurly_token, error) != 0)
 		return -1;
 	for (int i = 0; i < object->size; ++i) {
-		if (is_first) {
+		if (is_first)
 			is_first = 0;
-		} else {
-			if (mdea_emitter_emit_string(e, L",\n", error) != 0)
-				return -1;
-		}
-		for (int i = 0; i <= indent; ++i) {
-			if (mdea_emitter_emit_string(e, L"  ", error) != 0)
-				return -1;
-		}
-		if (mdea_emitter_emit_string(e, L"\"", error) != 0)
+		else if (mdea_emitter_emit(e, mdea_comma_token, error) != 0)
 			return -1;
-		if (mdea_emitter_emit_string(e, object->fields[i].key, error) != 0)
+		if (mdea_emitter_emit(e, mdea_string_token(object->fields[i].key), error) != 0)
 			return -1;
-		if (mdea_emitter_emit_string(e, L"\": ", error) != 0)
+		else if (mdea_emitter_emit(e, mdea_colon_token, error) != 0)
 			return -1;
 		mdea_serialize(object->fields[i].val, e, indent + 1, error);
 	}
-	if (mdea_emitter_emit_string(e, L"\n", error) != 0)
-		return -1;
-	for (int i = 0; i < indent; ++i) {
-		if (mdea_emitter_emit_string(e, L"  ", error) != 0)
-			return -1;
-	}
-	if (mdea_emitter_emit_string(e, L"}", error) != 0)
+	if (mdea_emitter_emit(e, mdea_rcurly_token, error) != 0)
 		return -1;
 	return 0;
 }

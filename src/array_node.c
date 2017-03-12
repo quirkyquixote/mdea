@@ -17,34 +17,17 @@ int mdea_array_node_serialize(void *p, struct mdea_emitter *e, int indent, wchar
 {
 	struct mdea_array *array;
 	mdea_get_array(p, &array, NULL);
-	if (array->size == 0) {
-		if (mdea_emitter_emit_string(e, L"[]", error) != 0)
-			return -1;
-		return 0;
-	}
 	int is_first = 1;
-	if (mdea_emitter_emit_string(e, L"[\n", error) != 0)
+	if (mdea_emitter_emit(e, mdea_lbracket_token, error) != 0)
 		return -1;
 	for (int i = 0; i < array->size; ++i) {
-		if (is_first) {
+		if (is_first)
 			is_first = 0;
-		} else {
-			if (mdea_emitter_emit_string(e, L",\n", error) != 0)
-				return -1;
-		}
-		for (int i = 0; i <= indent; ++i) {
-			if (mdea_emitter_emit_string(e, L"  ", error) != 0)
-				return -1;
-		}
+		else if (mdea_emitter_emit(e, mdea_comma_token, error) != 0)
+			return -1;
 		mdea_serialize(array->vals[i], e, indent + 1, error);
 	}
-	if (mdea_emitter_emit_string(e, L"\n", error) != 0)
-		return -1;
-	for (int i = 0; i < indent; ++i) {
-		if (mdea_emitter_emit_string(e, L"  ", error) != 0)
-			return -1;
-	}
-	if (mdea_emitter_emit_string(e, L"]", error) != 0)
+	if (mdea_emitter_emit(e, mdea_rbracket_token, error) != 0)
 		return -1;
 	return 0;
 }

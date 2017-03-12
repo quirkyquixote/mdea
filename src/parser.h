@@ -3,8 +3,7 @@
 #ifndef MDEA_PARSER_H_
 #define MDEA_PARSER_H_
 
-#include "token.h"
-#include "node.h"
+#include "emitter.h"
 
 /*
  * Parser type
@@ -13,7 +12,7 @@ struct mdea_parser_type {
 	/* Destroy (but not free) */
 	void (*destroy)(void *);
 	/* Extract next token */
-	int (*parse)(void *, struct mdea_token *, wchar_t **error);
+	int (*parse)(void *, struct mdea_emitter *, wchar_t **error);
 };
 
 /*
@@ -31,14 +30,11 @@ static inline void mdea_parser_destroy(struct mdea_parser *t)
 	free(t);
 }
 
-/* Get next token */
-static inline int mdea_parser_parse(struct mdea_parser *t,
-		struct mdea_token *tok, wchar_t **error)
+/* Parse */
+static inline int mdea_parse(struct mdea_parser *t, struct mdea_emitter *e,
+		wchar_t **error)
 {
-	return t->type->parse(t, tok, error);
+	return t->type->parse(t, e, error);
 }
-
-/* Parse node */
-int mdea_read(struct mdea_parser *p, struct mdea_node **node, wchar_t **error);
 
 #endif  // MDEA_TOKEN_H_

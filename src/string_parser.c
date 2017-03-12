@@ -122,9 +122,22 @@ int mdea_string_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
 	}
 }
 
+int mdea_string_parser_parse(void *p, struct mdea_emitter *e, wchar_t **error)
+{
+	struct mdea_string_parser *t = p;
+	struct mdea_token tok;
+	while (mdea_string_parser_next(t, &tok, error) == 0) {
+		if (tok.type == MDEA_TOK_END)
+			return 0;
+		if (mdea_emitter_emit(e, tok, error) != 0)
+			return -1;
+	}
+	return -1;
+}
+
 const struct mdea_parser_type mdea_string_parser_type = {
 	mdea_string_parser_destroy,
-	mdea_string_parser_next,
+	mdea_string_parser_parse,
 };
 
 struct mdea_parser *mdea_string_parser(const wchar_t *string)

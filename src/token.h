@@ -23,14 +23,33 @@ struct mdea_token {
 		MDEA_TOK_RCURLY,
 		MDEA_TOK_COMMA,
 		MDEA_TOK_COLON,
-		MDEA_TOK_BREAK,
-		MDEA_TOK_INDENT,
 		MDEA_TOK_END
 	} type;
 	union {
-		wchar_t *string;
 		double number;
+		const wchar_t *string;
 	};
 };
+
+extern const struct mdea_token mdea_null_token;
+extern const struct mdea_token mdea_true_token;
+extern const struct mdea_token mdea_false_token;
+extern const struct mdea_token mdea_lbracket_token;
+extern const struct mdea_token mdea_rbracket_token;
+extern const struct mdea_token mdea_lcurly_token;
+extern const struct mdea_token mdea_rcurly_token;
+extern const struct mdea_token mdea_comma_token;
+extern const struct mdea_token mdea_colon_token;
+extern const struct mdea_token mdea_end_token;
+
+static inline struct mdea_token mdea_number_token(double number)
+{
+	return (struct mdea_token){ MDEA_TOK_NUMBER, { .number = number } };
+}
+
+static inline struct mdea_token mdea_string_token(const wchar_t *string)
+{
+	return (struct mdea_token){ MDEA_TOK_STRING, { .string = string } };
+}
 
 #endif  // MDEA_TOKEN_H_

@@ -119,6 +119,15 @@ static inline int mdea_array_get(struct mdea_array *a, size_t key, struct mdea_n
 	return 0;
 }
 
+/* Get last element from array */
+static inline int mdea_array_get_back(struct mdea_array *a, struct mdea_node **rval)
+{
+	if (a->size == 0)
+		return -1;
+	*rval = a->vals[a->size - 1];
+	return 0;
+}
+
 /* Iterate over array */
 #define mdea_array_foreach(_v, _a) \
 	for (int _i = 0; (_i != (_a)->size) && (_v = (_a)->vals[_i]); ++_i)
