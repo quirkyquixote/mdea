@@ -3,11 +3,9 @@
 #ifndef MDEA_FILE_EMITTER_H_
 #define MDEA_FILE_EMITTER_H_
 
-#include <stdio.h>
-
 #include "emitter.h"
 
-struct mdea_emitter *mdea_file_emitter(FILE *file);
+struct mdea_emitter *mdea_file_emitter(int fd);
 
 #endif  // MDEA_FILE_EMITTER_H_
 

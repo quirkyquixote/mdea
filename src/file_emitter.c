@@ -2,11 +2,14 @@
 
 #include "file_emitter.h"
 
+#include <string.h>
+#include <unistd.h>
+
 #include "error.h"
 
 struct mdea_file_emitter {
 	const struct mdea_emitter_type *type;
-	FILE *file;
+	int fd;
 	int indent;
 	int last_token_type;
 };
@@ -16,6 +19,12 @@ void mdea_file_emitter_destroy(void *p)
 	struct mdea_file_emitter *e = p;
 }
 
+static inline int emit(struct mdea_file_emitter *e, const char *str)
+{
+	size_t len = strlen(str);
+	return write(e->fd, str, len) == len ? 0 : -1;
+}
+
 int mdea_file_emitter_emit(void *p, struct mdea_token tok, char **error)
 {
 	struct mdea_file_emitter *e = p;
@@ -23,45 +32,49 @@ int mdea_file_emitter_emit(void *p, struct mdea_token tok, char **error)
 	if ((e->last_token_type == MDEA_TOK_LBRACKET && tok.type != MDEA_TOK_RBRACKET) ||
 		(e->last_token_type == MDEA_TOK_LCURLY && tok.type != MDEA_TOK_RCURLY)) {
 		++e->indent;
-		fprintf(e->file, "\n");
+		emit(e, "\n");
 		for (int i = 0; i < e->indent; ++i)
-			fprintf(e->file, "  ");
+			emit(e, "  ");
 	}
 
 	if ((tok.type == MDEA_TOK_RBRACKET && e->last_token_type != MDEA_TOK_LBRACKET) ||
 		(tok.type == MDEA_TOK_RCURLY && e->last_token_type != MDEA_TOK_LCURLY)) {
 		--e->indent;
-		fprintf(e->file, "\n");
+		emit(e, "\n");
 		for (int i = 0; i < e->indent; ++i)
-			fprintf(e->file, "  ");
+			emit(e, "  ");
 	}
 
 	if (tok.type == MDEA_TOK_END) {
 		/* do nothing */
 	} else if (tok.type == MDEA_TOK_NULL) {
-		fprintf(e->file, "null");
+		emit(e, "null");
 	} else if (tok.type == MDEA_TOK_TRUE) {
-		fprintf(e->file, "true");
+		emit(e, "true");
 	} else if (tok.type == MDEA_TOK_FALSE) {
-		fprintf(e->file, "false");
+		emit(e, "false");
 	} else if (tok.type == MDEA_TOK_NUMBER) {
-		fprintf(e->file, "%lg", tok.number);
+		char buf[64];
+		snprintf(buf, sizeof(buf), "%lg", tok.number);
+		emit(e, buf);
 	} else if (tok.type == MDEA_TOK_STRING) {
-		fprintf(e->file, "\"%s\"", tok.string);
+		emit(e, "\"");
+		emit(e, tok.string);
+		emit(e, "\"");
 	} else if (tok.type == MDEA_TOK_LBRACKET) {
-		fprintf(e->file, "[");
+		emit(e, "[");
 	} else if (tok.type == MDEA_TOK_RBRACKET) {
-		fprintf(e->file, "]");
+		emit(e, "]");
 	} else if (tok.type == MDEA_TOK_LCURLY) {
-		fprintf(e->file, "{");
+		emit(e, "{");
 	} else if (tok.type == MDEA_TOK_RCURLY) {
-		fprintf(e->file, "}");
+		emit(e, "}");
 	} else if (tok.type == MDEA_TOK_COMMA) {
-		fprintf(e->file, ",\n");
+		emit(e, ",\n");
 		for (int i = 0; i < e->indent; ++i)
-			fprintf(e->file, "  ");
+			emit(e, "  ");
 	} else if (tok.type == MDEA_TOK_COLON) {
-		fprintf(e->file, ": ");
+		emit(e, ": ");
 	} else {
 		mdea_error(error, "Bad token: %d", tok.type);
 		return -1;
@@ -75,11 +88,11 @@ static const struct mdea_emitter_type mdea_file_emitter_type = {
 	mdea_file_emitter_emit,
 };
 
-struct mdea_emitter *mdea_file_emitter(FILE *file)
+struct mdea_emitter *mdea_file_emitter(int fd)
 {
 	struct mdea_file_emitter *e = calloc(1, sizeof(*e));
 	e->type = &mdea_file_emitter_type;
-	e->file = file;
+	e->fd = fd;
 	return (void *)e;
 }
 
