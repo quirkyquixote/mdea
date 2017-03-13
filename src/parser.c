@@ -9,10 +9,10 @@
 #include "array_node.h"
 #include "object_node.h"
 
-int mdea_parse(struct mdea_parser *t, struct mdea_token *tok, struct mdea_node **rval, wchar_t **error)
+int mdea_parse(struct mdea_parser *t, struct mdea_token *tok, struct mdea_node **rval, char **error)
 {
 	if (tok->type == MDEA_TOK_END) {
-		mdea_error(error, L"Unexpected end of file");
+		mdea_error(error, "Unexpected end of file");
 		return -1;
 	} else if (tok->type == MDEA_TOK_NULL) {
 		*rval = mdea_null_node();
@@ -47,7 +47,7 @@ int mdea_parse(struct mdea_parser *t, struct mdea_token *tok, struct mdea_node *
 			if (tok->type == MDEA_TOK_RBRACKET)
 				return 0;
 			if (tok->type != MDEA_TOK_COMMA) {
-				mdea_error(error, L"Expected end of list");
+				mdea_error(error, "Expected end of list");
 				return -1;
 			}
 			if (mdea_parser_parse(t, tok, error) != 0)
@@ -64,15 +64,15 @@ int mdea_parse(struct mdea_parser *t, struct mdea_token *tok, struct mdea_node *
 		for (;;) {
 			struct mdea_node *tmp;
 			if (tok->type != MDEA_TOK_STRING) {
-				mdea_error(error, L"Expected string");
+				mdea_error(error, "Expected string");
 				return -1;
 			}
-			wchar_t key[wcslen(tok->string) + 1];
-			wcscpy(key, tok->string);
+			char key[strlen(tok->string) + 1];
+			strcpy(key, tok->string);
 			if (mdea_parser_parse(t, tok, error) != 0)
 				return -1;
 			if (tok->type != MDEA_TOK_COLON) {
-				mdea_error(error, L"Expected ':'");
+				mdea_error(error, "Expected ':'");
 				return -1;
 			}
 			if (mdea_parser_parse(t, tok, error) != 0)
@@ -85,18 +85,18 @@ int mdea_parse(struct mdea_parser *t, struct mdea_token *tok, struct mdea_node *
 			if (tok->type == MDEA_TOK_RCURLY)
 				return 0;
 			if (tok->type != MDEA_TOK_COMMA) {
-				mdea_error(error, L"Expected end of list");
+				mdea_error(error, "Expected end of list");
 				return -1;
 			}
 			if (mdea_parser_parse(t, tok, error) != 0)
 				return -1;
 		}
 	}
-	mdea_error(error, L"bad token type: %d\n", tok->type);
+	mdea_error(error, "bad token type: %d\n", tok->type);
 	return -1;
 }
 
-int mdea_read(struct mdea_parser *t, struct mdea_node **rval, wchar_t **error)
+int mdea_read(struct mdea_parser *t, struct mdea_node **rval, char **error)
 {
 	struct mdea_token tok;
 	int ret = -1;

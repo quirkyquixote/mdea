@@ -8,11 +8,11 @@
 void print_array(struct mdea_array *array)
 {
 	struct mdea_node *iter;
-	const wchar_t *string;
+	const char *string;
 	printf("%zu elements:\n", array->size);
 	mdea_array_foreach(iter, array) {
 		mdea_get_string(iter, &string, NULL);
-		printf("%ls\n", string);
+		printf("%s\n", string);
 	}
 }
 
@@ -25,10 +25,7 @@ int main(int argc, char *argv[])
 
 	while (fscanf(stdin, "%s", line) == 1) {
 		if (line[0] == '+') {
-			size_t len = strlen(line + 1) + 1;
-			wchar_t tmp[len];
-			mbstowcs(tmp, line + 1, len);
-			mdea_array_push_back(&array, mdea_string_node(tmp));
+			mdea_array_push_back(&array, mdea_string_node(line + 1));
 		} else if (line[0] == '-') {
 			long key = strtol(line + 1, NULL, 10);
 			mdea_array_erase(&array, key);

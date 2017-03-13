@@ -5,7 +5,7 @@
 #include "mdea.h"
 
 
-int node_from_file(const char *path, struct mdea_node **node, wchar_t **error)
+int node_from_file(const char *path, struct mdea_node **node, char **error)
 {
 	int ret = -1;
 	FILE *file = fopen(path, "r");
@@ -22,11 +22,11 @@ int node_from_file(const char *path, struct mdea_node **node, wchar_t **error)
 	return ret;
 }
 
-int node_from_string(const char *string, struct mdea_node **node, wchar_t **error)
+int node_from_string(const char *string, struct mdea_node **node, char **error)
 {
 	size_t len = strlen(string) + 3;
-	wchar_t tmp[len];
-	swprintf(tmp, len, L"%s", string);
+	char tmp[len];
+	snprintf(tmp, len, "%s", string);
 	{
 		struct mdea_parser *p = mdea_string_parser(tmp);
 		struct mdea_emitter *e = mdea_node_emitter(node);
@@ -36,7 +36,7 @@ int node_from_string(const char *string, struct mdea_node **node, wchar_t **erro
 		if (ret == 0)
 			return 0;
 	}
-	swprintf(tmp, len, L"\"%s\"", string);
+	snprintf(tmp, len, "\"%s\"", string);
 	{
 		struct mdea_parser *p = mdea_string_parser(tmp);
 		struct mdea_emitter *e = mdea_node_emitter(node);
@@ -49,7 +49,7 @@ int node_from_string(const char *string, struct mdea_node **node, wchar_t **erro
 	return -1;
 }
 
-int node_to_file(const char *path, struct mdea_node *node, wchar_t **error)
+int node_to_file(const char *path, struct mdea_node *node, char **error)
 {
 	int ret = -1;
 	FILE *file = fopen(path, "w");
@@ -66,7 +66,7 @@ int node_to_file(const char *path, struct mdea_node *node, wchar_t **error)
 	return ret;
 }
 
-int test(int argc, char *argv[], wchar_t **error)
+int test(int argc, char *argv[], char **error)
 {
 	if (argc <= 1)
 		return -1;
@@ -77,8 +77,8 @@ int test(int argc, char *argv[], wchar_t **error)
 		if (node_from_file(argv[3], &root, error) != 0)
 			return -1;
 		size_t len = strlen(argv[2]) + 1;
-		wchar_t path[len];
-		swprintf(path, len, L"%s", argv[2]);
+		char path[len];
+		snprintf(path, len, "%s", argv[2]);
 		struct mdea_node *node;
 		if (mdea_get(root, path, &node, error) != 0)
 			return -1;
@@ -98,8 +98,8 @@ int test(int argc, char *argv[], wchar_t **error)
 		if (node_from_string(argv[3], &node, error) != 0)
 			return -1;
 		size_t len = strlen(argv[2]) + 1;
-		wchar_t path[len];
-		swprintf(path, len, L"%s", argv[2]);
+		char path[len];
+		snprintf(path, len, "%s", argv[2]);
 		if (mdea_set(&root, path, node, error) != 0)
 			return -1;
 		return node_to_file(argv[4], root, error);
@@ -109,13 +109,13 @@ int test(int argc, char *argv[], wchar_t **error)
 
 int main(int argc, char *argv[])
 {
-	wchar_t *error = NULL;
+	char *error = NULL;
 	if (test(argc, argv, &error) != 0) {
 		if (error == NULL) {
 			fprintf(stderr, "usage: mdea get <key> <path>\n");
 			fprintf(stderr, "       mdea set <key> <val> <path>\n");
 		} else {
-			fprintf(stderr, "ERROR: %ls\n", error);
+			fprintf(stderr, "ERROR: %s\n", error);
 		}
 		exit(EXIT_FAILURE);
 	}

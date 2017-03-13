@@ -23,7 +23,7 @@ struct mdea_object {
 	/* Allocated o */
 	struct {
 		/* Key for the field */
-		wchar_t *key;
+		char *key;
 		/* Value for the field */
 		struct mdea_node *val;
 	} *fields;
@@ -71,10 +71,10 @@ static inline size_t mdea_object_size(struct mdea_object *o)
 }
 
 /* Add field to object */
-static inline int mdea_object_insert(struct mdea_object *o, const wchar_t *key, struct mdea_node *val)
+static inline int mdea_object_insert(struct mdea_object *o, const char *key, struct mdea_node *val)
 {
 	for (size_t i = 0; i < o->size; ++i) {
-		if (wcscmp(key, o->fields[i].key) == 0) {
+		if (strcmp(key, o->fields[i].key) == 0) {
 			mdea_destroy(o->fields[i].val);
 			o->fields[i].val = val;
 			return 0;
@@ -85,17 +85,17 @@ static inline int mdea_object_insert(struct mdea_object *o, const wchar_t *key, 
 		o->fields = realloc(o->fields,
 				sizeof(*o->fields) * o->alloc);
 	}
-	o->fields[o->size].key = wcsdup(key);
+	o->fields[o->size].key = strdup(key);
 	o->fields[o->size].val = val;
 	++o->size;
 	return 0;
 }
 
 /* Remove field from object */
-static inline int mdea_object_erase(struct mdea_object *o, const wchar_t *key)
+static inline int mdea_object_erase(struct mdea_object *o, const char *key)
 {
 	for (size_t i = 0; i < o->size; ++i) {
-		if (wcscmp(key, o->fields[i].key) == 0) {
+		if (strcmp(key, o->fields[i].key) == 0) {
 			free(o->fields[i].key);
 			mdea_destroy(o->fields[i].val);
 			memmove(o->fields + i, o->fields + i + 1,
@@ -108,10 +108,10 @@ static inline int mdea_object_erase(struct mdea_object *o, const wchar_t *key)
 }
 
 /* Get field from object */
-static inline int mdea_object_get(struct mdea_object *o, const wchar_t *key, struct mdea_node **rval)
+static inline int mdea_object_get(struct mdea_object *o, const char *key, struct mdea_node **rval)
 {
 	for (size_t i = 0; i < o->size; ++i) {
-		if (wcscmp(key, o->fields[i].key) == 0) {
+		if (strcmp(key, o->fields[i].key) == 0) {
 			*rval = o->fields[i].val;
 			return 0;
 		}

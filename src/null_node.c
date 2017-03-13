@@ -10,40 +10,40 @@ void mdea_null_node_destroy(void *p)
 {
 }
 
-int mdea_null_node_serialize(void *p, struct mdea_emitter *e, int indent, wchar_t **error)
+int mdea_null_node_serialize(void *p, struct mdea_emitter *e, int indent, char **error)
 {
 	if (mdea_emitter_emit(e, mdea_null_token, error) != 0)
 		return -1;
 	return 0;
 }
 
-int mdea_null_node_get_number(void *p, double *number, wchar_t **error)
+int mdea_null_node_get_number(void *p, double *number, char **error)
 {
-	mdea_error(error, L"Expected number, got null");
+	mdea_error(error, "Expected number, got null");
 	return -1;
 }
 
-int mdea_null_node_get_string(void *p, const wchar_t **string, wchar_t **error)
+int mdea_null_node_get_string(void *p, const char **string, char **error)
 {
-	mdea_error(error, L"Expected string, got null");
+	mdea_error(error, "Expected string, got null");
 	return -1;
 }
 
-int mdea_null_node_get_boolean(void *p, int *boolean, wchar_t **error)
+int mdea_null_node_get_boolean(void *p, int *boolean, char **error)
 {
-	mdea_error(error, L"Expected boolean, got null");
+	mdea_error(error, "Expected boolean, got null");
 	return -1;
 }
 
-int mdea_null_node_get_array(void *p, struct mdea_array **array, wchar_t **error)
+int mdea_null_node_get_array(void *p, struct mdea_array **array, char **error)
 {
-	mdea_error(error, L"Expected array, got null");
+	mdea_error(error, "Expected array, got null");
 	return -1;
 }
 
-int mdea_null_node_get_object(void *p, struct mdea_object **object, wchar_t **error)
+int mdea_null_node_get_object(void *p, struct mdea_object **object, char **error)
 {
-	mdea_error(error, L"Expected object, got null");
+	mdea_error(error, "Expected object, got null");
 	return -1;
 }
 

@@ -27,7 +27,7 @@ struct mdea_token {
 	} type;
 	union {
 		double number;
-		const wchar_t *string;
+		const char *string;
 	};
 };
 
@@ -47,7 +47,7 @@ static inline struct mdea_token mdea_number_token(double number)
 	return (struct mdea_token){ MDEA_TOK_NUMBER, { .number = number } };
 }
 
-static inline struct mdea_token mdea_string_token(const wchar_t *string)
+static inline struct mdea_token mdea_string_token(const char *string)
 {
 	return (struct mdea_token){ MDEA_TOK_STRING, { .string = string } };
 }

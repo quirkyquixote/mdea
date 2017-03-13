@@ -11,7 +11,7 @@ void mdea_boolean_node_destroy(void *p)
 {
 }
 
-int mdea_boolean_node_serialize(void *p, struct mdea_emitter *e, int indent, wchar_t **error)
+int mdea_boolean_node_serialize(void *p, struct mdea_emitter *e, int indent, char **error)
 {
 	struct mdea_boolean_node *n = p;
 	if (mdea_emitter_emit(e, n->boolean ? mdea_true_token : mdea_false_token, error) != 0)
@@ -19,34 +19,34 @@ int mdea_boolean_node_serialize(void *p, struct mdea_emitter *e, int indent, wch
 	return 0;
 }
 
-int mdea_boolean_node_get_number(void *p, double *number, wchar_t **error)
+int mdea_boolean_node_get_number(void *p, double *number, char **error)
 {
-	mdea_error(error, L"Expected number, got boolean");
+	mdea_error(error, "Expected number, got boolean");
 	return -1;
 }
 
-int mdea_boolean_node_get_string(void *p, const wchar_t **string, wchar_t **error)
+int mdea_boolean_node_get_string(void *p, const char **string, char **error)
 {
-	mdea_error(error, L"Expected string, got boolean");
+	mdea_error(error, "Expected string, got boolean");
 	return -1;
 }
 
-int mdea_boolean_node_get_boolean(void *p, int *boolean, wchar_t **error)
+int mdea_boolean_node_get_boolean(void *p, int *boolean, char **error)
 {
 	struct mdea_boolean_node *n = p;
 	*boolean = n->boolean;
 	return 0;
 }
 
-int mdea_boolean_node_get_array(void *p, struct mdea_array **array, wchar_t **error)
+int mdea_boolean_node_get_array(void *p, struct mdea_array **array, char **error)
 {
-	mdea_error(error, L"Expected array, got boolean");
+	mdea_error(error, "Expected array, got boolean");
 	return -1;
 }
 
-int mdea_boolean_node_get_object(void *p, struct mdea_object **object, wchar_t **error)
+int mdea_boolean_node_get_object(void *p, struct mdea_object **object, char **error)
 {
-	mdea_error(error, L"Expected object, got boolean");
+	mdea_error(error, "Expected object, got boolean");
 	return -1;
 }
 

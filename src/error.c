@@ -6,14 +6,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void mdea_error(wchar_t **error, wchar_t *msg, ...)
+void mdea_error(char **error, char *msg, ...)
 {
 	if (error == NULL)
 		return;
 	va_list ap;
 	va_start(ap, msg);
 	*error = calloc(1024, sizeof(**error));
-	vswprintf(*error, 1024, msg, ap);
+	vsnprintf(*error, 1024, msg, ap);
 	va_end(ap);
 }
 

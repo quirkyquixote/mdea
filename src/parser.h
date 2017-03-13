@@ -12,7 +12,7 @@ struct mdea_parser_type {
 	/* Destroy (but not free) */
 	void (*destroy)(void *);
 	/* Extract next token */
-	int (*parse)(void *, struct mdea_emitter *, wchar_t **error);
+	int (*parse)(void *, struct mdea_emitter *, char **error);
 };
 
 /*
@@ -32,7 +32,7 @@ static inline void mdea_parser_destroy(struct mdea_parser *t)
 
 /* Parse */
 static inline int mdea_parse(struct mdea_parser *t, struct mdea_emitter *e,
-		wchar_t **error)
+		char **error)
 {
 	return t->type->parse(t, e, error);
 }

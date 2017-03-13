@@ -16,54 +16,54 @@ void mdea_file_emitter_destroy(void *p)
 	struct mdea_file_emitter *e = p;
 }
 
-int mdea_file_emitter_emit(void *p, struct mdea_token tok, wchar_t **error)
+int mdea_file_emitter_emit(void *p, struct mdea_token tok, char **error)
 {
 	struct mdea_file_emitter *e = p;
 
 	if ((e->last_token_type == MDEA_TOK_LBRACKET && tok.type != MDEA_TOK_RBRACKET) ||
 		(e->last_token_type == MDEA_TOK_LCURLY && tok.type != MDEA_TOK_RCURLY)) {
 		++e->indent;
-		fwprintf(e->file, L"\n");
+		fprintf(e->file, "\n");
 		for (int i = 0; i < e->indent; ++i)
-			fwprintf(e->file, L"  ");
+			fprintf(e->file, "  ");
 	}
 
 	if ((tok.type == MDEA_TOK_RBRACKET && e->last_token_type != MDEA_TOK_LBRACKET) ||
 		(tok.type == MDEA_TOK_RCURLY && e->last_token_type != MDEA_TOK_LCURLY)) {
 		--e->indent;
-		fwprintf(e->file, L"\n");
+		fprintf(e->file, "\n");
 		for (int i = 0; i < e->indent; ++i)
-			fwprintf(e->file, L"  ");
+			fprintf(e->file, "  ");
 	}
 
 	if (tok.type == MDEA_TOK_END) {
 		/* do nothing */
 	} else if (tok.type == MDEA_TOK_NULL) {
-		fwprintf(e->file, L"null");
+		fprintf(e->file, "null");
 	} else if (tok.type == MDEA_TOK_TRUE) {
-		fwprintf(e->file, L"true");
+		fprintf(e->file, "true");
 	} else if (tok.type == MDEA_TOK_FALSE) {
-		fwprintf(e->file, L"false");
+		fprintf(e->file, "false");
 	} else if (tok.type == MDEA_TOK_NUMBER) {
-		fwprintf(e->file, L"%lg", tok.number);
+		fprintf(e->file, "%lg", tok.number);
 	} else if (tok.type == MDEA_TOK_STRING) {
-		fwprintf(e->file, L"\"%ls\"", tok.string);
+		fprintf(e->file, "\"%s\"", tok.string);
 	} else if (tok.type == MDEA_TOK_LBRACKET) {
-		fwprintf(e->file, L"[");
+		fprintf(e->file, "[");
 	} else if (tok.type == MDEA_TOK_RBRACKET) {
-		fwprintf(e->file, L"]");
+		fprintf(e->file, "]");
 	} else if (tok.type == MDEA_TOK_LCURLY) {
-		fwprintf(e->file, L"{");
+		fprintf(e->file, "{");
 	} else if (tok.type == MDEA_TOK_RCURLY) {
-		fwprintf(e->file, L"}");
+		fprintf(e->file, "}");
 	} else if (tok.type == MDEA_TOK_COMMA) {
-		fwprintf(e->file, L",\n");
+		fprintf(e->file, ",\n");
 		for (int i = 0; i < e->indent; ++i)
-			fwprintf(e->file, L"  ");
+			fprintf(e->file, "  ");
 	} else if (tok.type == MDEA_TOK_COLON) {
-		fwprintf(e->file, L": ");
+		fprintf(e->file, ": ");
 	} else {
-		mdea_error(error, L"Bad token: %d", tok.type);
+		mdea_error(error, "Bad token: %d", tok.type);
 		return -1;
 	}
 	e->last_token_type = tok.type;

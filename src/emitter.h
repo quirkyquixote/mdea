@@ -15,7 +15,7 @@ struct mdea_emitter_type {
 	/* Destroy (but not free) */
 	void (*destroy)(void *);
 	/* Emit a token */
-	int (*emit)(void *, struct mdea_token tok, wchar_t **error);
+	int (*emit)(void *, struct mdea_token tok, char **error);
 };
 
 /*
@@ -34,7 +34,7 @@ static inline void mdea_emitter_destroy(struct mdea_emitter *e)
 }
 
 /* Emit a token */
-static inline int mdea_emitter_emit(struct mdea_emitter *e, struct mdea_token tok, wchar_t **error)
+static inline int mdea_emitter_emit(struct mdea_emitter *e, struct mdea_token tok, char **error)
 {
 	return e->type->emit(e, tok, error);
 }

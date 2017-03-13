@@ -16,7 +16,7 @@ void mdea_node_parser_destroy(void *p)
 	struct mdea_node_parser *t = p;
 }
 
-int mdea_node_parser_parse(void *p, struct mdea_emitter *e, wchar_t **error)
+int mdea_node_parser_parse(void *p, struct mdea_emitter *e, char **error)
 {
 	struct mdea_node_parser *t = p;
 	return mdea_serialize(t->node, e, 0, error);

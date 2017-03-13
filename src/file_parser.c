@@ -2,7 +2,7 @@
 
 #include "file_parser.h"
 
-#include <wctype.h>
+#include <ctype.h>
 
 #include "error.h"
 
@@ -11,7 +11,7 @@ struct mdea_file_parser {
 	FILE *file;
 	size_t alloc;
 	size_t size;
-	wchar_t *buf;
+	char *buf;
 };
 
 void mdea_file_parser_destroy(void *p)
@@ -21,13 +21,41 @@ void mdea_file_parser_destroy(void *p)
 		free(f->buf);
 }
 
-int mdea_file_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
+wint_t get_utf8(struct mdea_file_parser *p)
+{
+	wint_t c;
+	c = fgetc(p->file);
+	if ((c & 0x80) == 0)
+		return c;
+	if ((c & 0xE0) == 0xC0) {
+		c &= 0x1F;
+		c += (fgetc(p->file) & 0x3F) << 5;
+		return c;
+	}
+	if ((c & 0xF0) == 0xE0) {
+		c &= 0x0F;
+		c += (fgetc(p->file) & 0x3F) << 4;
+		c += (fgetc(p->file) & 0x3F) << 10;
+		return c;
+	}
+	if ((c & 0xF8) == 0xF0) {
+		c &= 0x07;
+		c += (fgetc(p->file) & 0x3F) << 3;
+		c += (fgetc(p->file) & 0x3F) << 9;
+		c += (fgetc(p->file) & 0x3F) << 15;
+		return c;
+	}
+	return -1;
+}
+
+
+int mdea_file_parser_next(void *p, struct mdea_token *tok, char **error)
 {
 	struct mdea_file_parser *t = p;
 	int c;
 	do
-		c = fgetwc(t->file);
-	while (iswspace(c));
+		c = fgetc(t->file);
+	while (isspace(c));
 	if (c == WEOF) {
 		tok->type = MDEA_TOK_END;
 		return 0;
@@ -53,9 +81,9 @@ int mdea_file_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
 		t->size = 0;
 		int escaped = 0;
 		for (;;) {
-			c = fgetwc(t->file);
+			c = fgetc(t->file);
 			if (c == WEOF) {
-				mdea_error(error, L"Unexpected end of file");
+				mdea_error(error, "Unexpected end of file");
 				return -1;
 			}
 			if (!escaped) {
@@ -79,44 +107,44 @@ int mdea_file_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
 			++t->size;
 		}
 	} else if ((c >= '0' && c <= '9') || c == '.') {
-		ungetwc(c, t->file);
+		ungetc(c, t->file);
 		tok->type = MDEA_TOK_NUMBER;
-		fwscanf(t->file, L"%lf", &tok->number);
+		fscanf(t->file, "%lf", &tok->number);
 		return 0;
 	} else if (c == 'n') {
-		if (fgetwc(t->file) != 'u' || fgetwc(t->file) != 'l'
-				|| fgetwc(t->file) != 'l') {
-			mdea_error(error, L"Expected null");
+		if (fgetc(t->file) != 'u' || get_utf8(t) != 'l'
+				|| fgetc(t->file) != 'l') {
+			mdea_error(error, "Expected null");
 			return -1;
 		}
 		tok->type = MDEA_TOK_NULL;
 		return 0;
 	} else if (c == 't') {
-		if (fgetwc(t->file) != 'r' || fgetwc(t->file) != 'u'
-				|| fgetwc(t->file) != 'e') {
-			mdea_error(error, L"Expected true");
+		if (fgetc(t->file) != 'r' || get_utf8(t) != 'u'
+				|| fgetc(t->file) != 'e') {
+			mdea_error(error, "Expected true");
 			return -1;
 		}
 		tok->type = MDEA_TOK_TRUE;
 		return 0;
 	} else if (c == 'f') {
-		if (fgetwc(t->file) != 'a' || fgetwc(t->file) != 'l'
-				|| fgetwc(t->file) != 's' || fgetwc(t->file) != 'e') {
-			mdea_error(error, L"Expected false");
+		if (fgetc(t->file) != 'a' || get_utf8(t) != 'l'
+				|| fgetc(t->file) != 's' || get_utf8(t) != 'e') {
+			mdea_error(error, "Expected false");
 			return -1;
 		}
 		tok->type = MDEA_TOK_FALSE;
 		return 0;
 	} else {
-		if (iswprint(c))
-			mdea_error(error, L"Unexpected character: '%lc'", c);
+		if (isprint(c))
+			mdea_error(error, "Unexpected character: '%lc'", c);
 		else
-			mdea_error(error, L"Unexpected character: \\u%04X", c);
+			mdea_error(error, "Unexpected character: \\u%04X", c);
 		return -1;
 	}
 }
 
-int mdea_file_parser_parse(void *p, struct mdea_emitter *e, wchar_t **error)
+int mdea_file_parser_parse(void *p, struct mdea_emitter *e, char **error)
 {
 	struct mdea_file_parser *t = p;
 	struct mdea_token tok;

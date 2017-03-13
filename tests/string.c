@@ -1,33 +1,28 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
 #include <stdio.h>
+#include <unistd.h>
 
 #include "mdea.h"
 
 int main(int argc, char *argv[])
 {
-	wchar_t *error;
-	size_t alloc = 0;
-	size_t len = 0;
-	wchar_t *buf = NULL;
-	wint_t c;
-	for (;;) {
-		if (len == alloc) {
-			alloc = alloc ? 2 * alloc : 2;
-			buf = realloc(buf, alloc * sizeof(*buf));
-		}
-		c = fgetwc(stdin);
-		if (c == WEOF)
-			break;
-		buf[len++] = c;
-	}
-	buf[len] = 0;
+	size_t alloc = 0, len = 0;
+	char *buf = NULL, *buf2, *error;
+
+	do {
+		alloc += 256;
+		buf = realloc(buf, alloc);
+		len += read(STDIN_FILENO, buf + len, alloc - len);
+	} while (len == alloc);
+
+	buf2 = malloc(alloc);
 	struct mdea_parser *t = mdea_string_parser(buf);
-	struct mdea_emitter *e = mdea_string_emitter(buf, len);
+	struct mdea_emitter *e = mdea_string_emitter(buf2, alloc);
 	if (mdea_parse(t, e, &error) != 0)
-		fwprintf(stderr, L"ERROR: %ls\n", error);
+		fprintf(stderr, "ERROR: %s\n", error);
 	else
-		fwprintf(stdout, L"%ls", buf);
+		write(STDOUT_FILENO, buf2, strlen(buf2));
 	mdea_parser_destroy(t);
 	mdea_emitter_destroy(e);
 }

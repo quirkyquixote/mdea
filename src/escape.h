@@ -7,7 +7,7 @@
 
 /* Translate all backlash sequences in str in a newly allocated string; return
  * NULL if there is a parsing error */
-wchar_t *mdea_escape(const wchar_t *str, wchar_t **error);
+char *mdea_escape(const char *str, char **error);
 
 #endif  // MDEA_ESCAPE_H_
 

@@ -5,13 +5,13 @@
 void print_object(struct mdea_object *object)
 {
 	struct mdea_node *val;
-	wchar_t *key;
-	const wchar_t *string;
+	char *key;
+	const char *string;
 
 	printf("%zu elements:\n", object->size);
 	mdea_object_foreach(key, val, object) {
 		mdea_get_string(val, &string, NULL);
-		printf("%ls: %ls\n", key, string);
+		printf("%s: %s\n", key, string);
 	}
 }
 
@@ -24,15 +24,9 @@ int main(int argc, char *argv[])
 
 	while (fscanf(stdin, "%s", line) == 1) {
 		if (line[0] == '+') {
-			size_t len = strlen(line + 1) + 1;
-			wchar_t tmp[len];
-			mbstowcs(tmp, line + 1, len);
-			mdea_object_insert(&object, tmp, mdea_string_node(tmp));
+			mdea_object_insert(&object, line + 1, mdea_string_node(line + 1));
 		} else if (line[0] == '-') {
-			size_t len = strlen(line + 1) + 1;
-			wchar_t tmp[len];
-			mbstowcs(tmp, line + 1, len);
-			mdea_object_erase(&object, tmp);
+			mdea_object_erase(&object, line + 1);
 		} else if (strcmp(line, "x") == 0) {
 			mdea_object_clear(&object);
 		} else {

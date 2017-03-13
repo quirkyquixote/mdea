@@ -1,19 +1,20 @@
-/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
+
 
 #ifndef MDEA_ESCAPE_H_
 #define MDEA_ESCAPE_H_
 
 #include "escape.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "error.h"
 
-wchar_t *mdea_escape(const wchar_t *str, wchar_t **error)
+char *mdea_escape(const char *str, char **error)
 {
 	size_t alloc = 0;
 	size_t size = 0;
-	wchar_t *buf = NULL;
+	char *buf = NULL;
 	for (;;) {
 		if (alloc == size) {
 			alloc = alloc ? 2 * alloc : 2;
@@ -28,7 +29,7 @@ wchar_t *mdea_escape(const wchar_t *str, wchar_t **error)
 			++str;
 			if (*str == 0) {
 				free(buf);
-				mdea_error(error, L"Unexpected end of string");
+				mdea_error(error, "Unexpected end of string");
 				return NULL;
 			}
 			if (*str == '0') {
@@ -63,35 +64,38 @@ wchar_t *mdea_escape(const wchar_t *str, wchar_t **error)
 				++str;
 			} else if (*str == 'x') {
 				++str;
-				int tmp;
-				if (swscanf(str, L"%02X%n", &buf[size], &tmp) < 1 || tmp != 2) {
+				int val, tmp;
+				if (sscanf(str, "%02X%n", &val, &tmp) < 1 || tmp != 2) {
 					free(buf);
-					mdea_error(error, L"Expected \\xXX");
+					mdea_error(error, "Expected \\xXX");
 					return NULL;
 				}
+				buf[size] = val;
 				str += 2;
 			} else if (*str == 'u') {
 				++str;
 				if (*str == '{') {
-					int tmp;
-					if (swscanf(str, L"{%X}%n", &buf[size], &tmp) < 1) {
+					int val, tmp;
+					if (sscanf(str, "{%X}%n", &val, &tmp) < 1) {
 						free(buf);
-						mdea_error(error, L"Expected \\u{X} ... \\u{XXXXXX}");
+						mdea_error(error, "Expected \\u{X} ... \\u{XXXXXX}");
 						return NULL;
 					}
+					buf[size] = val;
 					str += tmp;
 				} else {
-					int tmp;
-					if (swscanf(str, L"%04X%n", &buf[size], &tmp) < 1 || tmp != 4) {
+					int val, tmp;
+					if (sscanf(str, "%04X%n", &val, &tmp) < 1 || tmp != 4) {
 						free(buf);
-						mdea_error(error, L"Expected \\uXXXX");
+						mdea_error(error, "Expected \\uXXXX");
 						return NULL;
 					}
+					buf[size] = val;
 					str += 4;
 				}
 			} else {
 				free(buf);
-				mdea_error(error, L"Unknown escape sequence: \\%lc", *str);
+				mdea_error(error, "Unknown escape sequence: \\%lc", *str);
 				return NULL;
 			}
 		}

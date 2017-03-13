@@ -6,7 +6,7 @@
 #include "node.h"
 
 /* Create string node */
-struct mdea_node *mdea_string_node(const wchar_t *string);
+struct mdea_node *mdea_string_node(const char *string);
 
 #endif  // MDEA_STRING_NODE_H_
 

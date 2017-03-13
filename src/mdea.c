@@ -2,7 +2,7 @@
 
 #include "mdea.h"
 
-#include <wctype.h>
+#include <ctype.h>
 
 struct path_token {
 	enum {
@@ -12,7 +12,7 @@ struct path_token {
 	} type;
 	union {
 		int index;
-		wchar_t *field;
+		char *field;
 	};
 };
 
@@ -22,7 +22,7 @@ static void path_token_destroy(struct path_token *tok)
 		free(tok->field);
 }
 
-static int path_token_next(wchar_t **path, struct path_token *tok, wchar_t **error)
+static int path_token_next(char **path, struct path_token *tok, char **error)
 {
 	if (**path == 0) {
 		tok->type = PATH_TOKEN_END;
@@ -30,8 +30,8 @@ static int path_token_next(wchar_t **path, struct path_token *tok, wchar_t **err
 	}
 	if (**path == '[') {
 		int key, tmp;
-		if (swscanf(*path, L"[%d]%n", &key, &tmp) < 1) {
-			mdea_error(error, L"expected [<number>]");
+		if (sscanf(*path, "[%d]%n", &key, &tmp) < 1) {
+			mdea_error(error, "expected [<number>]");
 			return -1;
 		}
 		*path += tmp;
@@ -40,25 +40,25 @@ static int path_token_next(wchar_t **path, struct path_token *tok, wchar_t **err
 		return 0;
 	}
 	if (**path == '.') {
-		wchar_t key[wcslen(*path) + 1];
+		char key[strlen(*path) + 1];
 		int tmp;
-		if (swscanf(*path, L".%l[^[.]%n", key, &tmp) < 1) {
-			mdea_error(error, L"expected .string");
+		if (sscanf(*path, ".%[^[.]%n", key, &tmp) < 1) {
+			mdea_error(error, "expected .string");
 			return -1;
 		}
 		*path += tmp;
 		tok->type = PATH_TOKEN_FIELD;
-		tok->field = wcsdup(key);
+		tok->field = strdup(key);
 		return 0;
 	}
-	if (iswprint(**path))
-		mdea_error(error, L"Unexpected character: '%lc'", **path);
+	if (isprint(**path))
+		mdea_error(error, "Unexpected character: '%lc'", **path);
 	else
-		mdea_error(error, L"Unexpected character: \\u%04X", **path);
+		mdea_error(error, "Unexpected character: \\u%04X", **path);
 	return -1;
 }
 
-int mdea_get(struct mdea_node *root, wchar_t *key, struct mdea_node **rval, wchar_t **error)
+int mdea_get(struct mdea_node *root, char *key, struct mdea_node **rval, char **error)
 {
 	struct path_token tok;
 	int ret = -1;
@@ -72,7 +72,7 @@ int mdea_get(struct mdea_node *root, wchar_t *key, struct mdea_node **rval, wcha
 			if (mdea_get_array(*rval, &array, error) != 0)
 				break;
 			if (mdea_array_get(array, tok.index, rval) != 0) {
-				mdea_error(error, L"No such index: %d", tok.index);
+				mdea_error(error, "No such index: %d", tok.index);
 				break;
 			}
 		} else if (tok.type == PATH_TOKEN_FIELD) {
@@ -80,11 +80,11 @@ int mdea_get(struct mdea_node *root, wchar_t *key, struct mdea_node **rval, wcha
 			if (mdea_get_object(*rval, &object, error) != 0)
 				break;
 			if (mdea_object_get(object, tok.field, rval) != 0) {
-				mdea_error(error, L"No such field: %ls", tok.field);
+				mdea_error(error, "No such field: %ls", tok.field);
 				break;
 			}
 		} else {
-			mdea_error(error, L"Expected number or string");
+			mdea_error(error, "Expected number or string");
 			break;
 		}
 		path_token_destroy(&tok);
@@ -93,7 +93,7 @@ int mdea_get(struct mdea_node *root, wchar_t *key, struct mdea_node **rval, wcha
 	return ret;
 }
 
-int mdea_set(struct mdea_node **root, wchar_t *key, struct mdea_node *val, wchar_t **error)
+int mdea_set(struct mdea_node **root, char *key, struct mdea_node *val, char **error)
 {
 	struct path_token tok;
 	int ret = -1;
@@ -119,7 +119,7 @@ int mdea_set(struct mdea_node **root, wchar_t *key, struct mdea_node *val, wchar
 		if (mdea_set(&node, key, val, error) != 0)
 			goto cleanup;
 		if (mdea_array_insert(array, tok.index, node) != 0) {
-			mdea_error(error, L"Array accessed out of bounds");
+			mdea_error(error, "Array accessed out of bounds");
 			goto cleanup;
 		}
 		ret = 0;
@@ -142,7 +142,7 @@ int mdea_set(struct mdea_node **root, wchar_t *key, struct mdea_node *val, wchar
 		mdea_object_insert(object, tok.field, node);
 		ret = 0;
 	} else {
-		mdea_error(error, L"Expected number or string");
+		mdea_error(error, "Expected number or string");
 	}
 cleanup:
 	path_token_destroy(&tok);

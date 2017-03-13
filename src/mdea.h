@@ -18,8 +18,8 @@
 #include "string_emitter.h"
 #include "node_emitter.h"
 
-int mdea_get(struct mdea_node *root, wchar_t *key, struct mdea_node **rval, wchar_t **error);
-int mdea_set(struct mdea_node **root, wchar_t *key, struct mdea_node *val, wchar_t **error);
+int mdea_get(struct mdea_node *root, char *key, struct mdea_node **rval, char **error);
+int mdea_set(struct mdea_node **root, char *key, struct mdea_node *val, char **error);
 
 #endif  // MDEA_H_
 

@@ -6,11 +6,11 @@
 
 int main(int argc, char *argv[])
 {
-	wchar_t *error;
+	char *error;
 	struct mdea_parser *t = mdea_file_parser(stdin);
 	struct mdea_emitter *e = mdea_file_emitter(stdout);
 	if (mdea_parse(t, e, &error) != 0)
-		fwprintf(stderr, L"ERROR: %ls\n", error);
+		fprintf(stderr, "ERROR: %s\n", error);
 	mdea_parser_destroy(t);
 	mdea_emitter_destroy(e);
 }

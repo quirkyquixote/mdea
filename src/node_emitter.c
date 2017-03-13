@@ -7,7 +7,7 @@
 struct mdea_node_emitter {
 	const struct mdea_emitter_type *type;
 	struct mdea_array stack;
-	wchar_t *key;
+	char *key;
 	struct mdea_node *node;
 	struct mdea_node **root;
 	int state;
@@ -21,7 +21,7 @@ void mdea_node_emitter_destroy(void *p)
 	mdea_array_deinit(&e->stack);
 }
 
-int mdea_node_emitter_emit(void *p, struct mdea_token tok, wchar_t **error)
+int mdea_node_emitter_emit(void *p, struct mdea_token tok, char **error)
 {
 	struct mdea_node_emitter *e = p;
 
@@ -108,7 +108,7 @@ int mdea_node_emitter_emit(void *p, struct mdea_token tok, wchar_t **error)
 		}
 	} else if (e->state == 4) {
 		if (tok.type == MDEA_TOK_STRING) {
-			e->key = wcsdup(tok.string);
+			e->key = strdup(tok.string);
 			e->state = 5;
 		} else if (tok.type == MDEA_TOK_RCURLY) {
 			goto pop_stack;

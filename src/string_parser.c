@@ -2,16 +2,16 @@
 
 #include "string_parser.h"
 
-#include <wctype.h>
+#include <ctype.h>
 
 #include "error.h"
 
 struct mdea_string_parser {
 	const struct mdea_parser_type *type;
-	const wchar_t *cur;
+	const char *cur;
 	size_t alloc;
 	size_t size;
-	wchar_t *buf;
+	char *buf;
 };
 
 void mdea_string_parser_destroy(void *p)
@@ -21,12 +21,12 @@ void mdea_string_parser_destroy(void *p)
 		free(t->buf);
 }
 
-int mdea_string_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
+int mdea_string_parser_next(void *p, struct mdea_token *tok, char **error)
 {
 	struct mdea_string_parser *t = p;
-	while (iswspace(*t->cur))
+	while (isspace(*t->cur))
 		++t->cur;
-	if (*t->cur == WEOF) {
+	if (*t->cur == 0) {
 		tok->type = MDEA_TOK_END;
 		++t->cur;
 		return 0;
@@ -59,8 +59,8 @@ int mdea_string_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
 		int escaped = 0;
 		for (;;) {
 			++t->cur;
-			if (*t->cur == WEOF) {
-				mdea_error(error, L"Unexpected end of file");
+			if (*t->cur == 0) {
+				mdea_error(error, "Unexpected end of string");
 				return -1;
 			}
 			if (!escaped) {
@@ -85,12 +85,12 @@ int mdea_string_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
 	} else if ((*t->cur >= '0' && *t->cur <= '9') || *t->cur == '.') {
 		int tmp;
 		tok->type = MDEA_TOK_NUMBER;
-		swscanf(t->cur, L"%lf%n", &tok->number, &tmp);
+		sscanf(t->cur, "%lf%n", &tok->number, &tmp);
 		t->cur += tmp;
 		return 0;
 	} else if (*t->cur == 'n') {
 		if (t->cur[1] != 'u' || t->cur[2] != 'l' || t->cur[3] != 'l') {
-			mdea_error(error, L"Expected null");
+			mdea_error(error, "Expected null");
 			return -1;
 		}
 		t->cur += 4;
@@ -98,7 +98,7 @@ int mdea_string_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
 		return 0;
 	} else if (*t->cur == 't') {
 		if (t->cur[1] != 'r' || t->cur[2] != 'u' || t->cur[3] != 'e') {
-			mdea_error(error, L"Expected true");
+			mdea_error(error, "Expected true");
 			return -1;
 		}
 		t->cur += 4;
@@ -107,22 +107,22 @@ int mdea_string_parser_next(void *p, struct mdea_token *tok, wchar_t **error)
 	} else if (*t->cur == 'f') {
 		if (t->cur[1] != 'a' || t->cur[2] != 'l' || t->cur[3] != 's'
 				 || t->cur[3] != 'e') {
-			mdea_error(error, L"Expected false");
+			mdea_error(error, "Expected false");
 			return -1;
 		}
 		t->cur += 5;
 		tok->type = MDEA_TOK_FALSE;
 		return 0;
 	} else {
-		if (iswprint(*t->cur))
-			mdea_error(error, L"Unexpected character: '%lc'", *t->cur);
+		if (isprint(*t->cur))
+			mdea_error(error, "Unexpected character: '%lc'", *t->cur);
 		else
-			mdea_error(error, L"Unexpected character: \\u%04X", *t->cur);
+			mdea_error(error, "Unexpected character: \\u%04X", *t->cur);
 		return -1;
 	}
 }
 
-int mdea_string_parser_parse(void *p, struct mdea_emitter *e, wchar_t **error)
+int mdea_string_parser_parse(void *p, struct mdea_emitter *e, char **error)
 {
 	struct mdea_string_parser *t = p;
 	struct mdea_token tok;
@@ -140,7 +140,7 @@ const struct mdea_parser_type mdea_string_parser_type = {
 	mdea_string_parser_parse,
 };
 
-struct mdea_parser *mdea_string_parser(const wchar_t *string)
+struct mdea_parser *mdea_string_parser(const char *string)
 {
 	struct mdea_string_parser *t = calloc(1, sizeof(*t));
 	t->type = &mdea_string_parser_type;
