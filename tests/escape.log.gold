@@ -1,33 +1,52 @@
-foo
+
 hello, world
 this is a simple string
-and these are escaped: 
-and these: '
-and these: "
-and these: \
-and these: 
-
-and these: 
-and these: 
-and these: 	
-and these: 
-and these: 
-and these:  
-and these: ?
-and these: ?
-and these: ?
-and these: ?
-and these: ?
-ERROR: Expected \xXX
-ERROR: Expected \xXX
-ERROR: Expected \xXX
-unicode: ?
-unicode: ?
-unicode: ?
-unicode: ?
-unicode: ?
-ERROR: Expected \uXXXX
-ERROR: Expected \uXXXX
-ERROR: Expected \uXXXX
-ERROR: Expected \uXXXX
-ERROR: Expected \uXXXX
+Escape Sequences
+  "'" """ "\" "
+" "" "" "	" "" "" "Basic Latin
+  @ A B C D E F G
+  H I J K L M N O
+Latin Extended-A
+  Ā ā Ă ă Ą ą Ć ć
+  Ĉ ĉ Ċ ċ Č č Ď ď
+Latin Extended-B
+  ƀ Ɓ Ƃ ƃ Ƅ ƅ Ɔ Ƈ
+  ƈ Ɖ Ɗ Ƌ ƌ ƍ Ǝ Ə
+IPA Extensions
+  ɐ ɑ ɒ ɓ ɔ ɕ ɖ ɗ
+  ɘ ə ɚ ɛ ɜ ɝ ɞ ɟ
+Spacing Modifier Letters
+  ʰ ʱ ʲ ʳ ʴ ʵ ʶ ʷ
+  ʸ ʹ ʺ ʻ ʼ ʽ ʾ ʿ
+Combining Diacritical Marks
+  ̀ ́ ̂ ̃ ̄ ̅ ̆ ̇
+  ̈ ̉ ̊ ̋ ̌ ̍ ̎ ̏
+Greek and Coptic
+  ΐ Α Β Γ Δ Ε Ζ Η
+  Θ Ι Κ Λ Μ Ν Ξ Ο
+Cyrillic
+  Ѐ Ё Ђ Ѓ Є Ѕ І Ї
+  Ј Љ Њ Ћ Ќ Ѝ Ў Џ
+Armenian
+  ԰ Ա Բ Գ Դ Ե Զ Է
+  Ը Թ Ժ Ի Լ Խ Ծ Կ
+Hebrew
+  א ב ג ד ה ו ז ח
+  ט י ך כ ל ם מ ן
+Georgian
+  Ⴀ Ⴁ Ⴂ Ⴃ Ⴄ Ⴅ Ⴆ Ⴇ
+  Ⴈ Ⴉ Ⴊ Ⴋ Ⴌ Ⴍ Ⴎ Ⴏ
+Gothic
+  𐌰 𐌱 𐌲 𐌳 𐌴 𐌵 𐌶 𐌷
+  𐌸 𐌹 𐌺 𐌻 𐌼 𐌽 𐌾 𐌿
+Bad Sequences
+Expected \xXX
+Expected \xXX
+Expected \xXX
+Expected \uXXXX
+Expected \uXXXX
+Expected \uXXXX
+Expected \uXXXX
+Expected \uXXXX
+Expected \u{X} ... \u{XXXXXX}
+Expected \u{X} ... \u{XXXXXX}

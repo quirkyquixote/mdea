@@ -7,23 +7,18 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "error.h"
 
 char *mdea_escape(const char *str, char **error)
 {
-	size_t alloc = 0;
 	size_t size = 0;
-	char *buf = NULL;
+	char *buf = calloc(strlen(str), 1);
+	int val;
 	for (;;) {
-		if (alloc == size) {
-			alloc = alloc ? 2 * alloc : 2;
-			buf = realloc(buf, alloc * sizeof(*buf));
-		}
 		if (*str != '\\') {
-			buf[size] = *str;
-			if (*str == 0)
-				break;
+			val = *str;
 			++str;
 		} else {
 			++str;
@@ -33,65 +28,62 @@ char *mdea_escape(const char *str, char **error)
 				return NULL;
 			}
 			if (*str == '0') {
-				buf[size] = 0;
+				val = 0;
 				++str;
 			} else if (*str == '\'') {
-				buf[size] = '\'';
+				val = '\'';
 				++str;
 			} else if (*str == '"') {
-				buf[size] = '"';
+				val = '"';
 				++str;
 			} else if (*str == '\\') {
-				buf[size] = '\\';
+				val = '\\';
 				++str;
 			} else if (*str == 'n') {
-				buf[size] = '\n';
+				val = '\n';
 				++str;
 			} else if (*str == 'r') {
-				buf[size] = '\r';
+				val = '\r';
 				++str;
 			} else if (*str == 'v') {
-				buf[size] = '\v';
+				val = '\v';
 				++str;
 			} else if (*str == 't') {
-				buf[size] = '\t';
+				val = '\t';
 				++str;
 			} else if (*str == 'b') {
-				buf[size] = '\b';
+				val = '\b';
 				++str;
 			} else if (*str == 'f') {
-				buf[size] = '\f';
+				val = '\f';
 				++str;
 			} else if (*str == 'x') {
 				++str;
-				int val, tmp;
+				int tmp;
 				if (sscanf(str, "%02X%n", &val, &tmp) < 1 || tmp != 2) {
 					free(buf);
 					mdea_error(error, "Expected \\xXX");
 					return NULL;
 				}
-				buf[size] = val;
-				str += 2;
+				str += tmp;
 			} else if (*str == 'u') {
 				++str;
 				if (*str == '{') {
-					int val, tmp;
+					int tmp;
 					if (sscanf(str, "{%X}%n", &val, &tmp) < 1) {
 						free(buf);
 						mdea_error(error, "Expected \\u{X} ... \\u{XXXXXX}");
 						return NULL;
 					}
-					buf[size] = val;
 					str += tmp;
 				} else {
-					int val, tmp;
+					int tmp;
 					if (sscanf(str, "%04X%n", &val, &tmp) < 1 || tmp != 4) {
 						free(buf);
 						mdea_error(error, "Expected \\uXXXX");
 						return NULL;
 					}
-					buf[size] = val;
-					str += 4;
+					str += tmp;
 				}
 			} else {
 				free(buf);
@@ -99,7 +91,23 @@ char *mdea_escape(const char *str, char **error)
 				return NULL;
 			}
 		}
-		++size;
+		if (val <= 0x7F) {
+			buf[size++] = val;
+			if (val == 0)
+				break;
+		} else if (val <= 0x7FF) {
+			buf[size++] = 0xC0 + ((val >> 6) & 0x1F);
+			buf[size++] = 0x80 + (val & 0x3F);
+		} else if (val <= 0xFFFF) {
+			buf[size++] = 0xE0 + ((val >> 12) & 0x0F);
+			buf[size++] = 0x80 + ((val >> 6) & 0x3F);
+			buf[size++] = 0x80 + (val & 0x3F);
+		} else if (val <= 0x10FFFF) {
+			buf[size++] = 0xF0 + ((val >> 18) & 0x07);
+			buf[size++] = 0x80 + ((val >> 12) & 0x3F);
+			buf[size++] = 0x80 + ((val >> 6) & 0x3F);
+			buf[size++] = 0x80 + (val & 0x3F);
+		}
 	}
 	return buf;
 }

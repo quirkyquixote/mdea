@@ -19,7 +19,8 @@ int main(int argc, char *argv[])
 		size_t len = strlen(line);
 		escaped = mdea_escape(line, &error);
 		if (escaped == NULL) {
-			fprintf(stdout, "ERROR: %s\n", error);
+			write(STDOUT_FILENO, error, strlen(error));
+			write(STDOUT_FILENO, "\n", 1);
 			free(error);
 		} else {
 			write(STDOUT_FILENO, escaped, strlen(escaped));

@@ -1,32 +1,52 @@
 
 hello, world
 this is a simple string
-and these are escaped: \0
-and these: \'
-and these: \"
-and these: \\
-and these: \n
-and these: \r
-and these: \v
-and these: \t
-and these: \b
-and these: \f
-and these: \xA0
-and these: \xA1
-and these: \xA2
-and these: \xA4
-and these: \xA8
-and these: \xB0
-this is faulty: \x
-this is faulty: \x0
-this is faulty: \xMM
-unicode: \u0100
-unicode: \u0101
-unicode: \u0102
-unicode: \u0104
-unicode: \u0108
-this is faulty: \u
-this is faulty: \u0
-this is faulty: \u00
-this is faulty: \u000
-this is faulty: \uMMMM
+Escape Sequences
+  "\'" "\"" "\\" "\n" "\r" "\v" "\t" "\b" "\f" "\0"
+Basic Latin
+  \x40 \x41 \x42 \x43 \x44 \x45 \x46 \x47
+  \x48 \x49 \x4A \x4B \x4C \x4D \x4E \x4F
+Latin Extended-A
+  \u0100 \u0101 \u0102 \u0103 \u0104 \u0105 \u0106 \u0107
+  \u0108 \u0109 \u010A \u010B \u010C \u010D \u010E \u010F
+Latin Extended-B
+  \u0180 \u0181 \u0182 \u0183 \u0184 \u0185 \u0186 \u0187
+  \u0188 \u0189 \u018A \u018B \u018C \u018D \u018E \u018F
+IPA Extensions
+  \u0250 \u0251 \u0252 \u0253 \u0254 \u0255 \u0256 \u0257
+  \u0258 \u0259 \u025A \u025B \u025C \u025D \u025E \u025F
+Spacing Modifier Letters
+  \u02B0 \u02B1 \u02B2 \u02B3 \u02B4 \u02B5 \u02B6 \u02B7
+  \u02B8 \u02B9 \u02BA \u02BB \u02BC \u02BD \u02BE \u02BF
+Combining Diacritical Marks
+  \u0300 \u0301 \u0302 \u0303 \u0304 \u0305 \u0306 \u0307
+  \u0308 \u0309 \u030A \u030B \u030C \u030D \u030E \u030F
+Greek and Coptic
+  \u0390 \u0391 \u0392 \u0393 \u0394 \u0395 \u0396 \u0397
+  \u0398 \u0399 \u039A \u039B \u039C \u039D \u039E \u039F
+Cyrillic
+  \u0400 \u0401 \u0402 \u0403 \u0404 \u0405 \u0406 \u0407
+  \u0408 \u0409 \u040A \u040B \u040C \u040D \u040E \u040F
+Armenian
+  \u0530 \u0531 \u0532 \u0533 \u0534 \u0535 \u0536 \u0537
+  \u0538 \u0539 \u053A \u053B \u053C \u053D \u053E \u053F
+Hebrew
+  \u05D0 \u05D1 \u05D2 \u05D3 \u05D4 \u05D5 \u05D6 \u05D7
+  \u05D8 \u05D9 \u05DA \u05DB \u05DC \u05DD \u05DE \u05DF
+Georgian
+  \u10A0 \u10A1 \u10A2 \u10A3 \u10A4 \u10A5 \u10A6 \u10A7
+  \u10A8 \u10A9 \u10AA \u10AB \u10AC \u10AD \u10AE \u10AF
+Gothic
+  \u{10330} \u{10331} \u{10332} \u{10333} \u{10334} \u{10335} \u{10336} \u{10337}
+  \u{10338} \u{10339} \u{1033A} \u{1033B} \u{1033C} \u{1033D} \u{1033E} \u{1033F}
+Bad Sequences
+  \x
+  \x0
+  \xMM
+  \u
+  \u0
+  \u00
+  \u000
+  \uJUNK
+  \u{}
+  \u{JUNK}
