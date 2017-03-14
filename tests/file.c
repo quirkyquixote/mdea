@@ -8,7 +8,7 @@
 int main(int argc, char *argv[])
 {
 	char *error;
-	struct mdea_parser *t = mdea_file_parser(stdin);
+	struct mdea_parser *t = mdea_file_parser(STDIN_FILENO);
 	struct mdea_emitter *e = mdea_file_emitter(STDOUT_FILENO);
 	if (mdea_parse(t, e, &error) != 0)
 		fprintf(stderr, "ERROR: %s\n", error);

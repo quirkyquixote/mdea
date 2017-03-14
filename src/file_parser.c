@@ -3,12 +3,15 @@
 #include "file_parser.h"
 
 #include <ctype.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "error.h"
 
 struct mdea_file_parser {
 	const struct mdea_parser_type *type;
-	FILE *file;
+	int fd;
+	int c;
 	size_t alloc;
 	size_t size;
 	char *buf;
@@ -21,40 +24,24 @@ void mdea_file_parser_destroy(void *p)
 		free(f->buf);
 }
 
-wint_t get_utf8(struct mdea_file_parser *p)
+int next_char(struct mdea_file_parser *f)
 {
-	wint_t c;
-	c = fgetc(p->file);
-	if ((c & 0x80) == 0)
-		return c;
-	if ((c & 0xE0) == 0xC0) {
-		c &= 0x1F;
-		c += (fgetc(p->file) & 0x3F) << 5;
-		return c;
+	char c;
+	if (f->c != -1) {
+		c = f->c;
+		f->c = -1;
+	} else if (read(f->fd, &c, 1) != 1) {
+		return -1;
 	}
-	if ((c & 0xF0) == 0xE0) {
-		c &= 0x0F;
-		c += (fgetc(p->file) & 0x3F) << 4;
-		c += (fgetc(p->file) & 0x3F) << 10;
-		return c;
-	}
-	if ((c & 0xF8) == 0xF0) {
-		c &= 0x07;
-		c += (fgetc(p->file) & 0x3F) << 3;
-		c += (fgetc(p->file) & 0x3F) << 9;
-		c += (fgetc(p->file) & 0x3F) << 15;
-		return c;
-	}
-	return -1;
+	return c;
 }
-
 
 int mdea_file_parser_next(void *p, struct mdea_token *tok, char **error)
 {
 	struct mdea_file_parser *t = p;
 	int c;
 	do
-		c = fgetc(t->file);
+		c = next_char(t);
 	while (isspace(c));
 	if (c == WEOF) {
 		tok->type = MDEA_TOK_END;
@@ -81,7 +68,7 @@ int mdea_file_parser_next(void *p, struct mdea_token *tok, char **error)
 		t->size = 0;
 		int escaped = 0;
 		for (;;) {
-			c = fgetc(t->file);
+			c = next_char(t);
 			if (c == WEOF) {
 				mdea_error(error, "Unexpected end of file");
 				return -1;
@@ -107,29 +94,36 @@ int mdea_file_parser_next(void *p, struct mdea_token *tok, char **error)
 			++t->size;
 		}
 	} else if ((c >= '0' && c <= '9') || c == '.') {
-		ungetc(c, t->file);
+		char buf[64];
+		int i = 0;
+		do {
+			buf[i++] = c;
+			c = next_char(t);
+		} while (strchr("0123456789.Ee+-", c) != NULL);
+		t->c = c;
+		buf[i] = 0;
 		tok->type = MDEA_TOK_NUMBER;
-		fscanf(t->file, "%lf", &tok->number);
+		sscanf(buf, "%lf", &tok->number);
 		return 0;
 	} else if (c == 'n') {
-		if (fgetc(t->file) != 'u' || get_utf8(t) != 'l'
-				|| fgetc(t->file) != 'l') {
+		if (next_char(t) != 'u' || next_char(t) != 'l'
+				|| next_char(t) != 'l') {
 			mdea_error(error, "Expected null");
 			return -1;
 		}
 		tok->type = MDEA_TOK_NULL;
 		return 0;
 	} else if (c == 't') {
-		if (fgetc(t->file) != 'r' || get_utf8(t) != 'u'
-				|| fgetc(t->file) != 'e') {
+		if (next_char(t) != 'r' || next_char(t) != 'u'
+				|| next_char(t) != 'e') {
 			mdea_error(error, "Expected true");
 			return -1;
 		}
 		tok->type = MDEA_TOK_TRUE;
 		return 0;
 	} else if (c == 'f') {
-		if (fgetc(t->file) != 'a' || get_utf8(t) != 'l'
-				|| fgetc(t->file) != 's' || get_utf8(t) != 'e') {
+		if (next_char(t) != 'a' || next_char(t) != 'l'
+				|| next_char(t) != 's' || next_char(t) != 'e') {
 			mdea_error(error, "Expected false");
 			return -1;
 		}
@@ -162,11 +156,12 @@ const struct mdea_parser_type mdea_file_parser_type = {
 	mdea_file_parser_parse,
 };
 
-struct mdea_parser *mdea_file_parser(FILE *file)
+struct mdea_parser *mdea_file_parser(int fd)
 {
 	struct mdea_file_parser *t = calloc(1, sizeof(*t));
 	t->type = &mdea_file_parser_type;
-	t->file = file;
+	t->fd = fd;
+	t->c = -1;
 	t->alloc = 0;
 	t->size = 0;
 	t->buf = NULL;

@@ -3,11 +3,9 @@
 #ifndef MDEA_FILE_PARSER_H_
 #define MDEA_FILE_PARSER_H_
 
-#include <stdio.h>
-
 #include "parser.h"
 
-struct mdea_parser *mdea_file_parser(FILE *file);
+struct mdea_parser *mdea_file_parser(int fd);
 
 #endif  // MDEA_FILE_PARSER_H_
 
