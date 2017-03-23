@@ -1,5 +1,8 @@
 
-
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <wctype.h>
 
 #include "mdea.h"
@@ -8,14 +11,14 @@
 int node_from_file(const char *path, struct mdea_node **node, char **error)
 {
 	int ret = -1;
-	FILE *file = fopen(path, "r");
-	if (file != NULL) {
+	int file = open(path, O_RDONLY);
+	if (file >= 0) {
 		struct mdea_parser *p = mdea_file_parser(file);
 		struct mdea_emitter *e = mdea_node_emitter(node);
 		ret = mdea_parse(p, e, error);
 		mdea_parser_destroy(p);
 		mdea_emitter_destroy(e);
-		fclose(file);
+		close(file);
 	} else {
 		perror(path);
 	}
@@ -52,14 +55,14 @@ int node_from_string(const char *string, struct mdea_node **node, char **error)
 int node_to_file(const char *path, struct mdea_node *node, char **error)
 {
 	int ret = -1;
-	FILE *file = fopen(path, "w");
-	if (file != NULL) {
+	int file = open(path, O_CREAT|O_WRONLY|O_TRUNC);
+	if (file >= 0) {
 		struct mdea_parser *p = mdea_node_parser(node);
 		struct mdea_emitter *e = mdea_file_emitter(file);
 		ret = mdea_write(e, node, error);
 		mdea_parser_destroy(p);
 		mdea_emitter_destroy(e);
-		fclose(file);
+		close(file);
 	} else {
 		perror(path);
 	}
@@ -82,7 +85,7 @@ int test(int argc, char *argv[], char **error)
 		struct mdea_node *node;
 		if (mdea_get(root, path, &node, error) != 0)
 			return -1;
-		struct mdea_emitter *e = mdea_file_emitter(stdout);
+		struct mdea_emitter *e = mdea_file_emitter(STDOUT_FILENO);
 		if (mdea_write(e, node, error) != 0)
 			return -1;
 		mdea_emitter_destroy(e);
