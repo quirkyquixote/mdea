@@ -15,6 +15,13 @@ Installation
 mdea provices a simple Makefile; to build from scratch:
 
     make all
+
+To run a number of basic tests on the compiled libraries:
+
+    make test
+
+To install the libraries in the default location (/usr/local):
+
     make install
 
 Usage
@@ -39,4 +46,7 @@ parsers, respectively.
 
 It is possible to implement new parser and emitter types and pass them to the
 `mdea_parse` function.
+
+The provided parsers and emitters assume all strings to be single-byte and
+encoded in UTF-8.
 
