@@ -67,7 +67,6 @@ struct mdea_node *mdea_boolean_node(int boolean)
 {
 	struct mdea_boolean_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_boolean_node_type;
-	n->ref_count = 1;
 	n->boolean = boolean;
 	return (void *)n;
 }

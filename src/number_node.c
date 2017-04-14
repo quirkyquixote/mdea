@@ -67,7 +67,6 @@ struct mdea_node *mdea_number_node(double number)
 {
 	struct mdea_number_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_number_node_type;
-	n->ref_count = 1;
 	n->number = number;
 	return (void *)n;
 }

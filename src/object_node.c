@@ -84,7 +84,6 @@ struct mdea_node *mdea_object_node(void)
 {
 	struct mdea_object_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_object_node_type;
-	n->ref_count = 1;
 	mdea_object_init(&n->object);
 	return (void *)n;
 }

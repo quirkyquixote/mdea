@@ -69,7 +69,6 @@ struct mdea_node *mdea_string_node(const char *string)
 {
 	struct mdea_string_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_string_node_type;
-	n->ref_count = 1;
 	n->string = strdup(string);
 	return (void *)n;
 }
