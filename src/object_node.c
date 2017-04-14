@@ -4,6 +4,7 @@
 
 struct mdea_object_node {
 	const struct mdea_node_type *type;
+	int ref_count;
 	struct mdea_object object;
 };
 
@@ -62,8 +63,10 @@ int mdea_object_node_get_array(void *p, struct mdea_array **array, char **error)
 
 int mdea_object_node_get_object(void *p, struct mdea_object **object, char **error)
 {
-	struct mdea_object_node *n = p;
-	*object = &n->object;
+	if (object != NULL) {
+		struct mdea_object_node *n = p;
+		*object = &n->object;
+	}
 	return 0;
 }
 
@@ -81,6 +84,7 @@ struct mdea_node *mdea_object_node(void)
 {
 	struct mdea_object_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_object_node_type;
+	n->ref_count = 1;
 	mdea_object_init(&n->object);
 	return (void *)n;
 }

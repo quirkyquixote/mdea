@@ -21,8 +21,10 @@ struct mdea_array {
 	struct mdea_node **vals;
 };
 
-/* Forward declaration of function to destroy nodes */
-extern void mdea_destroy(struct mdea_node *);
+/* Forward declaration of function to reference nodes */
+extern void mdea_ref(struct mdea_node *);
+/* Forward declaration of function to dereference nodes */
+extern void mdea_unref(struct mdea_node *);
 
 /* Initialize array */
 static inline void mdea_array_init(struct mdea_array *a)
@@ -36,7 +38,7 @@ static inline void mdea_array_init(struct mdea_array *a)
 static inline void mdea_array_clear(struct mdea_array *a)
 {
 	for (size_t i = 0; i < a->size; ++i)
-		mdea_destroy(a->vals[i]);
+		mdea_unref(a->vals[i]);
 	a->size = 0;
 }
 
@@ -73,6 +75,7 @@ static inline int mdea_array_insert(struct mdea_array *a, size_t i, struct mdea_
 			sizeof(*a->vals) * (a->size - i));
 	a->vals[i] = val;
 	++a->size;
+	mdea_ref(val);
 	return 0;
 }
 
@@ -81,7 +84,7 @@ static inline int mdea_array_erase(struct mdea_array *a, size_t i)
 {
 	if (i >= a->size)
 		return -1;
-	mdea_destroy(a->vals[i]);
+	mdea_unref(a->vals[i]);
 	memmove(a->vals + i, a->vals + i + 1,
 			sizeof(*a->vals) * (a->size - i - 1));
 	--a->size;
@@ -97,6 +100,7 @@ static inline int mdea_array_push_back(struct mdea_array *a, struct mdea_node *v
 	}
 	a->vals[a->size] = val;
 	++a->size;
+	mdea_ref(val);
 	return 0;
 }
 
@@ -106,7 +110,7 @@ static inline int mdea_array_pop_back(struct mdea_array *a)
 	if (a->size == 0)
 		return -1;
 	--a->size;
-	mdea_destroy(a->vals[a->size]);
+	mdea_unref(a->vals[a->size]);
 	return 0;
 }
 
@@ -116,6 +120,7 @@ static inline int mdea_array_get(struct mdea_array *a, size_t key, struct mdea_n
 	if (key >= a->size)
 		return -1;
 	*rval = a->vals[key];
+	mdea_ref(*rval);
 	return 0;
 }
 
@@ -125,6 +130,7 @@ static inline int mdea_array_get_back(struct mdea_array *a, struct mdea_node **r
 	if (a->size == 0)
 		return -1;
 	*rval = a->vals[a->size - 1];
+	mdea_ref(*rval);
 	return 0;
 }
 

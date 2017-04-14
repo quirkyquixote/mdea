@@ -34,6 +34,8 @@ struct mdea_node_type {
 struct mdea_node {
 	/* Pointer to type definition */
 	const struct mdea_node_type *type;
+	/* Reference counter */
+	int ref_count;
 };
 
 /* Serialize a node */

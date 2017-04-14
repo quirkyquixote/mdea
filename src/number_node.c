@@ -4,6 +4,7 @@
 
 struct mdea_number_node {
 	const struct mdea_node_type *type;
+	int ref_count;
 	double number;
 };
 
@@ -21,8 +22,10 @@ int mdea_number_node_serialize(void *p, struct mdea_emitter *e, int indent, char
 
 int mdea_number_node_get_number(void *p, double *number, char **error)
 {
-	struct mdea_number_node *n = p;
-	*number = n->number;
+	if (number != NULL) {
+		struct mdea_number_node *n = p;
+		*number = n->number;
+	}
 	return 0;
 }
 
@@ -64,6 +67,7 @@ struct mdea_node *mdea_number_node(double number)
 {
 	struct mdea_number_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_number_node_type;
+	n->ref_count = 1;
 	n->number = number;
 	return (void *)n;
 }

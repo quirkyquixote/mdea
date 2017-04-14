@@ -29,8 +29,10 @@ struct mdea_object {
 	} *fields;
 };
 
-/* Forward declaration for function to destroy values */
-extern void mdea_destroy(struct mdea_node *);
+/* Forward declaration of function to reference nodes */
+extern void mdea_ref(struct mdea_node *);
+/* Forward declaration of function to dereference nodes */
+extern void mdea_unref(struct mdea_node *);
 
 /* Initialize object */
 static inline void mdea_object_init(struct mdea_object *o)
@@ -45,7 +47,7 @@ static inline void mdea_object_clear(struct mdea_object *o)
 {
 	for (size_t i = 0; i < o->size; ++i) {
 		free(o->fields[i].key);
-		mdea_destroy(o->fields[i].val);
+		mdea_unref(o->fields[i].val);
 	}
 	o->size = 0;
 }
@@ -75,7 +77,7 @@ static inline int mdea_object_insert(struct mdea_object *o, const char *key, str
 {
 	for (size_t i = 0; i < o->size; ++i) {
 		if (strcmp(key, o->fields[i].key) == 0) {
-			mdea_destroy(o->fields[i].val);
+			mdea_unref(o->fields[i].val);
 			o->fields[i].val = val;
 			return 0;
 		}
@@ -88,6 +90,7 @@ static inline int mdea_object_insert(struct mdea_object *o, const char *key, str
 	o->fields[o->size].key = strdup(key);
 	o->fields[o->size].val = val;
 	++o->size;
+	mdea_ref(val);
 	return 0;
 }
 
@@ -97,7 +100,7 @@ static inline int mdea_object_erase(struct mdea_object *o, const char *key)
 	for (size_t i = 0; i < o->size; ++i) {
 		if (strcmp(key, o->fields[i].key) == 0) {
 			free(o->fields[i].key);
-			mdea_destroy(o->fields[i].val);
+			mdea_unref(o->fields[i].val);
 			memmove(o->fields + i, o->fields + i + 1,
 					sizeof(*o->fields) * (o->size - i - 1));
 			--o->size;
@@ -113,6 +116,7 @@ static inline int mdea_object_get(struct mdea_object *o, const char *key, struct
 	for (size_t i = 0; i < o->size; ++i) {
 		if (strcmp(key, o->fields[i].key) == 0) {
 			*rval = o->fields[i].val;
+			mdea_ref(*rval);
 			return 0;
 		}
 	}

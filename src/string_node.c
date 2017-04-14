@@ -4,6 +4,7 @@
 
 struct mdea_string_node {
 	const struct mdea_node_type *type;
+	int ref_count;
 	char *string;
 };
 
@@ -29,8 +30,10 @@ int mdea_string_node_get_number(void *p, double *number, char **error)
 
 int mdea_string_node_get_string(void *p, const char **string, char **error)
 {
-	struct mdea_string_node *n = p;
-	*string = n->string;
+	if (string != NULL) {
+		struct mdea_string_node *n = p;
+		*string = n->string;
+	}
 	return 0;
 }
 
@@ -66,6 +69,7 @@ struct mdea_node *mdea_string_node(const char *string)
 {
 	struct mdea_string_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_string_node_type;
+	n->ref_count = 1;
 	n->string = strdup(string);
 	return (void *)n;
 }

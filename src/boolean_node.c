@@ -4,6 +4,7 @@
 
 struct mdea_boolean_node {
 	const struct mdea_node_type *type;
+	int ref_count;
 	int boolean;
 };
 
@@ -33,8 +34,10 @@ int mdea_boolean_node_get_string(void *p, const char **string, char **error)
 
 int mdea_boolean_node_get_boolean(void *p, int *boolean, char **error)
 {
-	struct mdea_boolean_node *n = p;
-	*boolean = n->boolean;
+	if (boolean != NULL) {
+		struct mdea_boolean_node *n = p;
+		*boolean = n->boolean;
+	}
 	return 0;
 }
 
@@ -64,6 +67,7 @@ struct mdea_node *mdea_boolean_node(int boolean)
 {
 	struct mdea_boolean_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_boolean_node_type;
+	n->ref_count = 1;
 	n->boolean = boolean;
 	return (void *)n;
 }

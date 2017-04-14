@@ -4,6 +4,7 @@
 
 struct mdea_null_node {
 	const struct mdea_node_type *type;
+	int ref_count;
 };
 
 void mdea_null_node_destroy(void *p)
@@ -61,6 +62,7 @@ struct mdea_node *mdea_null_node(void)
 {
 	struct mdea_null_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_null_node_type;
+	n->ref_count = 1;
 	return (void *)n;
 }
 

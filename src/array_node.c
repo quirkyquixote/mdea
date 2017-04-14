@@ -4,6 +4,7 @@
 
 struct mdea_array_node {
 	const struct mdea_node_type *type;
+	int ref_count;
 	struct mdea_array array;
 };
 
@@ -52,8 +53,10 @@ int mdea_array_node_get_boolean(void *p, int *boolean, char **error)
 
 int mdea_array_node_get_array(void *p, struct mdea_array **array, char **error)
 {
-	struct mdea_array_node *n = p;
-	*array = &n->array;
+	if (array != NULL) {
+		struct mdea_array_node *n = p;
+		*array = &n->array;
+	}
 	return 0;
 }
 
@@ -77,6 +80,7 @@ struct mdea_node *mdea_array_node(void)
 {
 	struct mdea_array_node *n = calloc(1, sizeof(*n));
 	n->type = &mdea_array_node_type;
+	n->ref_count = 1;
 	mdea_array_init(&n->array);
 	return (void *)n;
 }
