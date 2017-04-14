@@ -44,6 +44,10 @@ $(DESTDIR)$(libdir)/%.so: %.so
 	$(QUIET_INSTALL)$(INSTALL) $< $@.$(version)
 	@cd $(DESTDIR)$(libdir) && ln -s -f $<.$(version) $<
 
+$(DESTDIR)$(libdir)/%.a: %.a
+	@$(INSTALL) -d $(@D)
+	$(QUIET_INSTALL)$(INSTALL) $< $@
+
 $(DESTDIR)$(bindir)/%: %
 	@$(INSTALL) -d $(@D)
 	$(QUIET_INSTALL)$(INSTALL) $< $@
