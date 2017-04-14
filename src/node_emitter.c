@@ -48,11 +48,14 @@ int mdea_node_emitter_emit(void *p, struct mdea_token tok, char **error)
 			*e->root = e->node = mdea_object_node();
 			e->state = 4;
 		} else {
+			mdea_error(error, "Expected value at root");
 			return -1;
 		}
 	} else if (e->state == 1) {
-		if (tok.type != MDEA_TOK_END)
+		if (tok.type != MDEA_TOK_END) {
+			mdea_error(error, "Expected end of stream");
 			return -1;
+		}
 	} else if (e->state == 2) {
 		if (tok.type == MDEA_TOK_NULL) {
 			struct mdea_array *array;
@@ -96,6 +99,7 @@ int mdea_node_emitter_emit(void *p, struct mdea_token tok, char **error)
 		} else if (tok.type == MDEA_TOK_RBRACKET) {
 			goto pop_stack;
 		} else {
+			mdea_error(error, "Expected value in array");
 			return -1;
 		}
 	} else if (e->state == 3) {
@@ -104,6 +108,7 @@ int mdea_node_emitter_emit(void *p, struct mdea_token tok, char **error)
 		} else if (tok.type == MDEA_TOK_RBRACKET) {
 			goto pop_stack;
 		} else {
+			mdea_error(error, "Expected comma or eny of array");
 			return -1;
 		}
 	} else if (e->state == 4) {
@@ -114,12 +119,14 @@ int mdea_node_emitter_emit(void *p, struct mdea_token tok, char **error)
 			goto pop_stack;
 		} else {
 			return -1;
+			mdea_error(error, "Expected string or end of object");
 		}
 	} else if (e->state == 5) {
 		if (tok.type == MDEA_TOK_COLON) {
 			e->state = 6;
 		} else {
 			return -1;
+			mdea_error(error, "Expected colon after string");
 		}
 	} else if (e->state == 6) {
 		if (tok.type == MDEA_TOK_NULL) {
@@ -170,16 +177,19 @@ int mdea_node_emitter_emit(void *p, struct mdea_token tok, char **error)
 			e->state = 4;
 		} else {
 			return -1;
+			mdea_error(error, "Expected value after colon");
 		}
 	} else if (e->state == 7) {
 		if (tok.type == MDEA_TOK_COMMA) {
 			e->state = 4;
-		} else if (tok.type == MDEA_TOK_RBRACKET) {
+		} else if (tok.type == MDEA_TOK_RCURLY) {
 			goto pop_stack;
 		} else {
+			mdea_error(error, "Expected comma or end of object");
 			return -1;
 		}
 	} else {
+		mdea_error(error, "FATAL: Corrupt state machine");
 		return -1;
 	}
 	return 0;
@@ -191,9 +201,9 @@ pop_stack:
 		mdea_array_get_back(&e->stack, &e->node);
 		mdea_array_pop_back(&e->stack);
 		if (mdea_get_array(e->node, NULL, NULL) == 0)
-			e->state = 2;
+			e->state = 3;
 		else if (mdea_get_object(e->node, NULL, NULL) == 0)
-			e->state = 4;
+			e->state = 7;
 		else
 			return -1;
 	}
