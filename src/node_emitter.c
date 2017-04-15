@@ -51,6 +51,7 @@ int mdea_node_emitter_emit(void *p, struct mdea_token tok, char **error)
 			mdea_error(error, "Expected value at root");
 			return -1;
 		}
+		mdea_ref(e->node);
 	} else if (e->state == 1) {
 		if (tok.type != MDEA_TOK_END) {
 			mdea_error(error, "Expected end of stream");
