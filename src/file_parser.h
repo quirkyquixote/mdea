@@ -5,6 +5,7 @@
 
 #include "parser.h"
 
+/* Create file parser */
 struct mdea_parser *mdea_file_parser(int fd);
 
 #endif  // MDEA_FILE_PARSER_H_

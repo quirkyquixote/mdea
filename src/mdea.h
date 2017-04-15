@@ -43,9 +43,7 @@
 int mdea_get(struct mdea_node *root, char *key, struct mdea_node **rval, char **error);
 int mdea_set(struct mdea_node **root, char *key, struct mdea_node *val, char **error);
 
-/*
- * Parse node tree from file descriptor
- */
+/* Parse node tree from file descriptor */
 static inline int mdea_node_from_file_desc(int file, struct mdea_node **node, char **error)
 {
 	struct mdea_parser *p = mdea_file_parser(file);
@@ -56,9 +54,7 @@ static inline int mdea_node_from_file_desc(int file, struct mdea_node **node, ch
 	return ret;
 }
 
-/*
- * Parse node tree from file path
- */
+/* Parse node tree from file path */
 static inline int mdea_node_from_file_path(const char *path, struct mdea_node **node, char **error)
 {
 	int file = open(path, O_RDONLY);
@@ -71,9 +67,7 @@ static inline int mdea_node_from_file_path(const char *path, struct mdea_node **
 	return ret;
 }
 
-/*
- * Parse node tree from string
- */
+/* Parse node tree from string */
 static inline int mdea_node_from_string(const char *str, struct mdea_node **node, char **error)
 {
 	struct mdea_parser *p = mdea_string_parser(str);
@@ -84,9 +78,7 @@ static inline int mdea_node_from_string(const char *str, struct mdea_node **node
 	return ret;
 }
 
-/*
- * Write node tree to file descriptor
- */
+/* Write node tree to file descriptor */
 static inline int mdea_node_to_file_desc(struct mdea_node *node, int file, char **error)
 {
 	struct mdea_parser *p = mdea_node_parser(node);
@@ -97,9 +89,7 @@ static inline int mdea_node_to_file_desc(struct mdea_node *node, int file, char 
 	return ret;
 }
 
-/*
- * Write node tree to file path
- */
+/* Write node tree to file path */
 static inline int mdea_node_to_file_path(struct mdea_node *node, const char *path, char **error)
 {
 	int file = creat(path, 0777);
@@ -112,9 +102,7 @@ static inline int mdea_node_to_file_path(struct mdea_node *node, const char *pat
 	return ret;
 }
 
-/*
- * Write node tree to string
- */
+/* Write node tree to string */
 static inline int mdea_node_to_string(struct mdea_node *node, char **str, size_t *len, char **error)
 {
 	struct mdea_parser *p = mdea_node_parser(node);

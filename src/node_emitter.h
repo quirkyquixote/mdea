@@ -6,6 +6,7 @@
 #include "emitter.h"
 #include "node.h"
 
+/* Create node emitter */
 struct mdea_emitter *mdea_node_emitter(struct mdea_node **node);
 
 #endif  // MDEA_NODE_EMITTER_H_

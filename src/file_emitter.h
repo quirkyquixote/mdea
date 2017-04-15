@@ -5,6 +5,7 @@
 
 #include "emitter.h"
 
+/* Create file emitter */
 struct mdea_emitter *mdea_file_emitter(int fd);
 
 #endif  // MDEA_FILE_EMITTER_H_

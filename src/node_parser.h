@@ -6,6 +6,7 @@
 #include "parser.h"
 #include "node.h"
 
+/* Create node parser */
 struct mdea_parser *mdea_node_parser(struct mdea_node *node);
 
 #endif  // MDEA_NODE_PARSER_H_

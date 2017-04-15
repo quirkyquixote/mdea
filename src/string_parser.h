@@ -5,6 +5,7 @@
 
 #include "parser.h"
 
+/* Create string parser */
 struct mdea_parser *mdea_string_parser(const char *string);
 
 #endif  // MDEA_STRING_PARSER_H_

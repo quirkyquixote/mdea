@@ -5,6 +5,7 @@
 
 #include "emitter.h"
 
+/* Create string emitter */
 struct mdea_emitter *mdea_string_emitter(char **string, size_t *len);
 
 #endif  // MDEA_STRING_EMITTER_H_
