@@ -8,8 +8,9 @@
 
 struct mdea_string_emitter {
 	const struct mdea_emitter_type *type;
-	char *buf;
+	char **buf;
 	size_t len;
+	size_t *alloc;
 	int indent;
 	int last_token_type;
 };
@@ -22,9 +23,14 @@ void mdea_string_emitter_destroy(void *p)
 int emit(struct mdea_string_emitter *e, const char *str)
 {
 	int ret = strlen(str);
-	strncpy(e->buf, str, e->len);
-	e->buf += ret;
-	e->len -= ret;
+	if (e->len + ret < *e->alloc) {
+		do
+			*e->alloc = *e->alloc ? *e->alloc * 2 : 2;
+		while (e->len + ret < *e->alloc);
+		*e->buf = realloc(*e->buf, *e->alloc);
+	}
+	strcpy(*e->buf + e->len, str);
+	e->len += ret;
 	return ret;
 }
 
@@ -33,7 +39,7 @@ int mdea_string_emitter_emit(void *p, struct mdea_token tok, char **error)
 	struct mdea_string_emitter *e = p;
 
 	if ((e->last_token_type == MDEA_TOK_LBRACKET && tok.type != MDEA_TOK_RBRACKET) ||
-		(e->last_token_type == MDEA_TOK_LCURLY && tok.type != MDEA_TOK_RCURLY)) {
+			(e->last_token_type == MDEA_TOK_LCURLY && tok.type != MDEA_TOK_RCURLY)) {
 		++e->indent;
 		emit(e, "\n");
 		for (int i = 0; i < e->indent; ++i)
@@ -41,7 +47,7 @@ int mdea_string_emitter_emit(void *p, struct mdea_token tok, char **error)
 	}
 
 	if ((tok.type == MDEA_TOK_RBRACKET && e->last_token_type != MDEA_TOK_LBRACKET) ||
-		(tok.type == MDEA_TOK_RCURLY && e->last_token_type != MDEA_TOK_LCURLY)) {
+			(tok.type == MDEA_TOK_RCURLY && e->last_token_type != MDEA_TOK_LCURLY)) {
 		--e->indent;
 		emit(e, "\n");
 		for (int i = 0; i < e->indent; ++i)
@@ -91,12 +97,12 @@ static const struct mdea_emitter_type mdea_string_emitter_type = {
 	mdea_string_emitter_emit,
 };
 
-struct mdea_emitter *mdea_string_emitter(char *buf, size_t len)
+struct mdea_emitter *mdea_string_emitter(char **buf, size_t *len)
 {
 	struct mdea_string_emitter *e = calloc(1, sizeof(*e));
 	e->type = &mdea_string_emitter_type;
 	e->buf = buf;
-	e->len = len;
+	e->alloc = len;
 	return (void *)e;
 }
 

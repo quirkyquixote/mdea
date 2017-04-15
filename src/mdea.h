@@ -82,7 +82,7 @@ static inline int mdea_node_to_file_path(struct mdea_node *node, const char *pat
 	return ret;
 }
 
-static inline int mdea_node_to_string(struct mdea_node *node, char *str, size_t len, char **error)
+static inline int mdea_node_to_string(struct mdea_node *node, char **str, size_t *len, char **error)
 {
 	struct mdea_parser *p = mdea_node_parser(node);
 	struct mdea_emitter *e = mdea_string_emitter(str, len);
