@@ -12,12 +12,11 @@ int test(int argc, char *argv[], char **error)
 	if (argc <= 1)
 		return -1;
 	if (strcmp(argv[1], "get") == 0) {
+		struct mdea_node *root, *node;
 		if (argc != 4)
 			return -1;
-		struct mdea_node *root;
 		if (mdea_node_from_file_path(argv[3], &root, error) != 0)
 			return -1;
-		struct mdea_node *node;
 		if (mdea_get(root, argv[2], &node, error) != 0)
 			return -1;
 		if (mdea_node_to_file_desc(node, STDOUT_FILENO, error) != 0)
@@ -25,12 +24,11 @@ int test(int argc, char *argv[], char **error)
 		return 0;
 	}
 	if (strcmp(argv[1], "set") == 0) {
+		struct mdea_node *root, *node;
 		if (argc != 5)
 			return -1;
-		struct mdea_node *root;
 		if (mdea_node_from_file_path(argv[4], &root, NULL) != 0)
 			root = mdea_object_node();
-		struct mdea_node *node;
 		if (mdea_node_from_string(argv[3], &node, error) != 0)
 			return -1;
 		if (mdea_set(&root, argv[2], node, error) != 0)
