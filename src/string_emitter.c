@@ -23,10 +23,10 @@ void mdea_string_emitter_destroy(void *p)
 int emit(struct mdea_string_emitter *e, const char *str)
 {
 	int ret = strlen(str);
-	if (e->len + ret < *e->alloc) {
+	if (e->len + ret + 1 > *e->alloc) {
 		do
 			*e->alloc = *e->alloc ? *e->alloc * 2 : 2;
-		while (e->len + ret < *e->alloc);
+		while (e->len + ret + 1 > *e->alloc);
 		*e->buf = realloc(*e->buf, *e->alloc);
 	}
 	strcpy(*e->buf + e->len, str);

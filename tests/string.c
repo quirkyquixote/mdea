@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 
 	buf2 = malloc(alloc);
 	struct mdea_parser *t = mdea_string_parser(buf);
-	struct mdea_emitter *e = mdea_string_emitter(buf2, alloc);
+	struct mdea_emitter *e = mdea_string_emitter(&buf2, &alloc);
 	if (mdea_parse(t, e, &error) != 0)
 		fprintf(stderr, "ERROR: %s\n", error);
 	else

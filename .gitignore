@@ -9,3 +9,4 @@ tests/object
 tests/file
 tests/string
 tests/escape
+tests/file_to_node_to_file

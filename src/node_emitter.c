@@ -58,47 +58,40 @@ int mdea_node_emitter_emit(void *p, struct mdea_token tok, char **error)
 			return -1;
 		}
 	} else if (e->state == 2) {
+		struct mdea_array *array;
+		mdea_get_array(e->node, &array, NULL);
 		if (tok.type == MDEA_TOK_NULL) {
-			struct mdea_array *array;
-			mdea_get_array(e->node, &array, NULL);
 			mdea_array_push_back(array, mdea_null_node());
 			e->state = 3;
 		} else if (tok.type == MDEA_TOK_TRUE) {
-			struct mdea_array *array;
-			mdea_get_array(e->node, &array, NULL);
 			mdea_array_push_back(array, mdea_boolean_node(1));
 			e->state = 3;
 		} else if (tok.type == MDEA_TOK_FALSE) {
-			struct mdea_array *array;
-			mdea_get_array(e->node, &array, NULL);
 			mdea_array_push_back(array, mdea_boolean_node(0));
 			e->state = 3;
 		} else if (tok.type == MDEA_TOK_NUMBER) {
-			struct mdea_array *array;
-			mdea_get_array(e->node, &array, NULL);
 			mdea_array_push_back(array, mdea_number_node(tok.number));
 			e->state = 3;
 		} else if (tok.type == MDEA_TOK_STRING) {
-			struct mdea_array *array;
-			mdea_get_array(e->node, &array, NULL);
 			mdea_array_push_back(array, mdea_string_node(tok.string));
 			e->state = 3;
 		} else if (tok.type == MDEA_TOK_LBRACKET) {
 			mdea_array_push_back(&e->stack, e->node);
-			struct mdea_array *array;
-			mdea_get_array(e->node, &array, NULL);
+			mdea_unref(e->node);
 			e->node = mdea_array_node();
 			mdea_array_push_back(array, e->node);
 			e->state = 2;
 		} else if (tok.type == MDEA_TOK_LCURLY) {
 			mdea_array_push_back(&e->stack, e->node);
-			struct mdea_array *array;
-			mdea_get_array(e->node, &array, NULL);
+			mdea_unref(e->node);
 			e->node = mdea_object_node();
 			mdea_array_push_back(array, e->node);
 			e->state = 4;
 		} else if (tok.type == MDEA_TOK_RBRACKET) {
-			goto pop_stack;
+			if (mdea_array_empty(array))
+				goto pop_stack;
+			mdea_error(error, "Expected value in array");
+			return -1;
 		} else {
 			mdea_error(error, "Expected value in array");
 			return -1;
@@ -109,7 +102,7 @@ int mdea_node_emitter_emit(void *p, struct mdea_token tok, char **error)
 		} else if (tok.type == MDEA_TOK_RBRACKET) {
 			goto pop_stack;
 		} else {
-			mdea_error(error, "Expected comma or eny of array");
+			mdea_error(error, "Expected comma or end of array");
 			return -1;
 		}
 	} else if (e->state == 4) {
@@ -117,7 +110,12 @@ int mdea_node_emitter_emit(void *p, struct mdea_token tok, char **error)
 			e->key = strdup(tok.string);
 			e->state = 5;
 		} else if (tok.type == MDEA_TOK_RCURLY) {
-			goto pop_stack;
+			struct mdea_object *object;
+			mdea_get_object(e->node, &object, NULL);
+			if (mdea_object_empty(object))
+				goto pop_stack;
+			mdea_error(error, "Expected string in object");
+			return -1;
 		} else {
 			return -1;
 			mdea_error(error, "Expected string or end of object");
@@ -130,56 +128,41 @@ int mdea_node_emitter_emit(void *p, struct mdea_token tok, char **error)
 			mdea_error(error, "Expected colon after string");
 		}
 	} else if (e->state == 6) {
+		struct mdea_object *object;
+		mdea_get_object(e->node, &object, NULL);
 		if (tok.type == MDEA_TOK_NULL) {
-			struct mdea_object *object;
-			mdea_get_object(e->node, &object, NULL);
 			mdea_object_insert(object, e->key, mdea_null_node());
-			free(e->key);
 			e->state = 7;
 		} else if (tok.type == MDEA_TOK_TRUE) {
-			struct mdea_object *object;
-			mdea_get_object(e->node, &object, NULL);
 			mdea_object_insert(object, e->key, mdea_boolean_node(1));
-			free(e->key);
 			e->state = 7;
 		} else if (tok.type == MDEA_TOK_FALSE) {
-			struct mdea_object *object;
-			mdea_get_object(e->node, &object, NULL);
 			mdea_object_insert(object, e->key, mdea_boolean_node(0));
-			free(e->key);
 			e->state = 7;
 		} else if (tok.type == MDEA_TOK_NUMBER) {
-			struct mdea_object *object;
-			mdea_get_object(e->node, &object, NULL);
 			mdea_object_insert(object, e->key, mdea_number_node(tok.number));
-			free(e->key);
 			e->state = 7;
 		} else if (tok.type == MDEA_TOK_STRING) {
-			struct mdea_object *object;
-			mdea_get_object(e->node, &object, NULL);
 			mdea_object_insert(object, e->key, mdea_string_node(tok.string));
-			free(e->key);
 			e->state = 7;
 		} else if (tok.type == MDEA_TOK_LBRACKET) {
 			mdea_array_push_back(&e->stack, e->node);
-			struct mdea_object *object;
-			mdea_get_object(e->node, &object, NULL);
+			mdea_unref(e->node);
 			e->node = mdea_array_node();
 			mdea_object_insert(object, e->key, e->node);
-			free(e->key);
 			e->state = 2;
 		} else if (tok.type == MDEA_TOK_LCURLY) {
 			mdea_array_push_back(&e->stack, e->node);
-			struct mdea_object *object;
-			mdea_get_object(e->node, &object, NULL);
+			mdea_unref(e->node);
 			e->node = mdea_object_node();
 			mdea_object_insert(object, e->key, e->node);
-			free(e->key);
 			e->state = 4;
 		} else {
 			return -1;
 			mdea_error(error, "Expected value after colon");
 		}
+		free(e->key);
+		e->key = NULL;
 	} else if (e->state == 7) {
 		if (tok.type == MDEA_TOK_COMMA) {
 			e->state = 4;
