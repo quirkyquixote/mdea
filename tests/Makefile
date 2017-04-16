@@ -9,6 +9,7 @@ objs += object.o
 objs += file.o
 objs += string.o
 objs += file_to_node_to_file.o
+objs += string_to_node_to_string.o
 
 bins = $(objs:.o=)
 deps = $(objs:.o=.d)
@@ -34,6 +35,7 @@ object: object.o ../src/libmdea.a
 file: file.o ../src/libmdea.a
 string: string.o ../src/libmdea.a
 file_to_node_to_file: file_to_node_to_file.o ../src/libmdea.a
+string_to_node_to_string: string_to_node_to_string.o ../src/libmdea.a
 
 .PHONY: make-always
 make-always:

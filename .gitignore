@@ -10,3 +10,4 @@ tests/file
 tests/string
 tests/escape
 tests/file_to_node_to_file
+tests/string_to_node_to_string
