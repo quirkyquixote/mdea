@@ -3,6 +3,9 @@ include ../config.mk
 
 ALL_CFLAGS += -I../src
 
+DIFF = diff -q --ignore-blank-lines --ignore-space-change
+MEMCHECK = valgrind -q --tool=memcheck
+
 objs += escape.o
 objs += array.o
 objs += object.o
@@ -17,7 +20,7 @@ logs = $(objs:.o=.log)
 
 .PHONY: all
 all: $(logs)
-	@for i in $(bins); do echo TEST $$i; diff -q --ignore-blank-lines --ignore-space-change $$i.log $$i.gold; done
+	@for i in $(bins); do echo TEST $$i; $(DIFF) $$i.log $$i.gold; done
 
 .PHONY: clean
 clean:
@@ -27,7 +30,7 @@ clean:
 	$(RM) $(logs)
 
 %.log: % %.in make-always
-	$(QUIET_GEN)./$< < $<.in > $@ 2>&1
+	$(QUIET_GEN)$(MEMCHECK) ./$< < $<.in > $@ 2>&1
 
 escape: escape.o ../src/libmdea.a
 array: array.o ../src/libmdea.a
