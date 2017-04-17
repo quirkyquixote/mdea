@@ -14,11 +14,12 @@ objs += token.o
 objs += json_parser.o
 objs += node_parser.o
 objs += emitter.o
-objs += file_emitter.o
-objs += string_emitter.o
+objs += json_emitter.o
 objs += node_emitter.o
 objs += string_input.o
 objs += file_input.o
+objs += string_output.o
+objs += file_output.o
 objs += mdea.o
 
 deps = $(objs:.o=.d)

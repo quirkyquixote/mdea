@@ -20,11 +20,12 @@
 #include "object_node.h"
 #include "json_parser.h"
 #include "node_parser.h"
-#include "file_emitter.h"
-#include "string_emitter.h"
+#include "json_emitter.h"
 #include "node_emitter.h"
 #include "file_input.h"
 #include "string_input.h"
+#include "file_output.h"
+#include "string_output.h"
 
 /*
  * Get and set nodes in a tree
@@ -87,10 +88,12 @@ static inline int mdea_node_from_string(const char *str, struct mdea_node **node
 static inline int mdea_node_to_file_desc(struct mdea_node *node, int file, char **error)
 {
 	struct mdea_parser *p = mdea_node_parser(node);
-	struct mdea_emitter *e = mdea_file_emitter(file);
+	struct mdea_output *o = mdea_file_output(file);
+	struct mdea_emitter *e = mdea_json_emitter(o);
 	int ret = mdea_parse(p, e, error);
 	mdea_parser_destroy(p);
 	mdea_emitter_destroy(e);
+	mdea_output_destroy(o);
 	return ret;
 }
 
@@ -111,10 +114,12 @@ static inline int mdea_node_to_file_path(struct mdea_node *node, const char *pat
 static inline int mdea_node_to_string(struct mdea_node *node, char **str, size_t *len, char **error)
 {
 	struct mdea_parser *p = mdea_node_parser(node);
-	struct mdea_emitter *e = mdea_string_emitter(str, len);
+	struct mdea_output *o = mdea_string_output(str, len);
+	struct mdea_emitter *e = mdea_json_emitter(o);
 	int ret = mdea_parse(p, e, error);
 	mdea_parser_destroy(p);
 	mdea_emitter_destroy(e);
+	mdea_output_destroy(o);
 	return ret;
 }
 
