@@ -87,10 +87,10 @@ int mdea_node_emitter_emit(void *p, struct mdea_token tok, char **error)
 			e->node = mdea_object_node();
 			mdea_array_push_back(array, e->node);
 			e->state = 4;
-		} else if (tok.type == MDEA_TOK_RBRACKET) {
-			if (mdea_array_empty(array))
+		} else if (mdea_array_empty(array)) {
+			if (tok.type == MDEA_TOK_RBRACKET)
 				goto pop_stack;
-			mdea_error(error, "Expected value in array");
+			mdea_error(error, "Expected value or end of array");
 			return -1;
 		} else {
 			mdea_error(error, "Expected value in array");
@@ -106,26 +106,26 @@ int mdea_node_emitter_emit(void *p, struct mdea_token tok, char **error)
 			return -1;
 		}
 	} else if (e->state == 4) {
+		struct mdea_object *object;
+		mdea_get_object(e->node, &object, NULL);
 		if (tok.type == MDEA_TOK_STRING) {
 			e->key = strdup(tok.string);
 			e->state = 5;
-		} else if (tok.type == MDEA_TOK_RCURLY) {
-			struct mdea_object *object;
-			mdea_get_object(e->node, &object, NULL);
-			if (mdea_object_empty(object))
+		} else if (mdea_object_empty(object)) {
+			if (tok.type == MDEA_TOK_RCURLY)
 				goto pop_stack;
-			mdea_error(error, "Expected string in object");
+			mdea_error(error, "Expected key or end of object");
 			return -1;
 		} else {
 			return -1;
-			mdea_error(error, "Expected string or end of object");
+			mdea_error(error, "Expected key in object");
 		}
 	} else if (e->state == 5) {
 		if (tok.type == MDEA_TOK_COLON) {
 			e->state = 6;
 		} else {
 			return -1;
-			mdea_error(error, "Expected colon after string");
+			mdea_error(error, "Expected colon after key");
 		}
 	} else if (e->state == 6) {
 		struct mdea_object *object;
