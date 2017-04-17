@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
 		buf = realloc(buf, alloc);
 		len += read(STDIN_FILENO, buf + len, alloc - len);
 	} while (len == alloc);
+	buf[len] = 0;
 
 	buf2 = malloc(alloc);
 	struct mdea_input *i = mdea_string_input(buf);

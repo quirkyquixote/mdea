@@ -13,6 +13,7 @@ int test(int argc, char *argv[], char **error)
 		buf = realloc(buf, alloc);
 		len += read(STDIN_FILENO, buf + len, alloc - len);
 	} while (len == alloc);
+	buf[len] = 0;
 
 	if (mdea_node_from_string(buf, &node, error) != 0)
 		return -1;
