@@ -6,8 +6,8 @@
 src/mdea-json
 tests/array
 tests/object
-tests/file
-tests/string
+tests/file_to_file
+tests/string_to_string
 tests/escape
 tests/file_to_node_to_file
 tests/string_to_node_to_string
