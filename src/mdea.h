@@ -18,12 +18,13 @@
 #include "boolean_node.h"
 #include "array_node.h"
 #include "object_node.h"
-#include "file_parser.h"
-#include "string_parser.h"
+#include "json_parser.h"
 #include "node_parser.h"
 #include "file_emitter.h"
 #include "string_emitter.h"
 #include "node_emitter.h"
+#include "file_input.h"
+#include "string_input.h"
 
 /*
  * Get and set nodes in a tree
@@ -46,11 +47,13 @@ int mdea_set(struct mdea_node **root, char *key, struct mdea_node *val, char **e
 /* Parse node tree from file descriptor */
 static inline int mdea_node_from_file_desc(int file, struct mdea_node **node, char **error)
 {
-	struct mdea_parser *p = mdea_file_parser(file);
+	struct mdea_input *i = mdea_file_input(file);
+	struct mdea_parser *p = mdea_json_parser(i);
 	struct mdea_emitter *e = mdea_node_emitter(node);
 	int ret = mdea_parse(p, e, error);
 	mdea_parser_destroy(p);
 	mdea_emitter_destroy(e);
+	mdea_input_destroy(i);
 	return ret;
 }
 
@@ -70,11 +73,13 @@ static inline int mdea_node_from_file_path(const char *path, struct mdea_node **
 /* Parse node tree from string */
 static inline int mdea_node_from_string(const char *str, struct mdea_node **node, char **error)
 {
-	struct mdea_parser *p = mdea_string_parser(str);
+	struct mdea_input *i = mdea_string_input(str);
+	struct mdea_parser *p = mdea_json_parser(i);
 	struct mdea_emitter *e = mdea_node_emitter(node);
 	int ret = mdea_parse(p, e, error);
 	mdea_parser_destroy(p);
 	mdea_emitter_destroy(e);
+	mdea_input_destroy(i);
 	return ret;
 }
 

@@ -1,6 +1,6 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#include "file_parser.h"
+#include "json_parser.h"
 
 #include <ctype.h>
 #include <string.h>
@@ -8,40 +8,27 @@
 
 #include "error.h"
 
-struct mdea_file_parser {
+struct mdea_json_parser {
 	const struct mdea_parser_type *type;
-	int fd;
-	int c;
+	struct mdea_input *in;
 	size_t alloc;
 	size_t size;
 	char *buf;
 };
 
-void mdea_file_parser_destroy(void *p)
+void mdea_json_parser_destroy(void *p)
 {
-	struct mdea_file_parser *f = p;
+	struct mdea_json_parser *f = p;
 	if (f->buf)
 		free(f->buf);
 }
 
-int next_char(struct mdea_file_parser *f)
+int mdea_json_parser_next(void *p, struct mdea_token *tok, char **error)
 {
-	char c;
-	if (f->c != -1) {
-		c = f->c;
-		f->c = -1;
-	} else if (read(f->fd, &c, 1) != 1) {
-		return -1;
-	}
-	return c;
-}
-
-int mdea_file_parser_next(void *p, struct mdea_token *tok, char **error)
-{
-	struct mdea_file_parser *t = p;
+	struct mdea_json_parser *t = p;
 	int c;
 	do
-		c = next_char(t);
+		c = mdea_input_get(t->in);
 	while (isspace(c));
 	if (c == WEOF) {
 		tok->type = MDEA_TOK_END;
@@ -68,9 +55,9 @@ int mdea_file_parser_next(void *p, struct mdea_token *tok, char **error)
 		t->size = 0;
 		int escaped = 0;
 		for (;;) {
-			c = next_char(t);
+			c = mdea_input_get(t->in);
 			if (c == WEOF) {
-				mdea_error(error, "Unexpected end of file");
+				mdea_error(error, "Unexpected end of json");
 				return -1;
 			}
 			if (!escaped) {
@@ -98,32 +85,36 @@ int mdea_file_parser_next(void *p, struct mdea_token *tok, char **error)
 		int i = 0;
 		do {
 			buf[i++] = c;
-			c = next_char(t);
+			c = mdea_input_get(t->in);
 		} while (strchr("0123456789.Ee+-", c) != NULL);
-		t->c = c;
+		mdea_input_unget(t->in, c);
 		buf[i] = 0;
 		tok->type = MDEA_TOK_NUMBER;
 		sscanf(buf, "%lf", &tok->number);
 		return 0;
 	} else if (c == 'n') {
-		if (next_char(t) != 'u' || next_char(t) != 'l'
-				|| next_char(t) != 'l') {
+		if (mdea_input_get(t->in) != 'u'
+				|| mdea_input_get(t->in) != 'l'
+				|| mdea_input_get(t->in) != 'l') {
 			mdea_error(error, "Expected null");
 			return -1;
 		}
 		tok->type = MDEA_TOK_NULL;
 		return 0;
 	} else if (c == 't') {
-		if (next_char(t) != 'r' || next_char(t) != 'u'
-				|| next_char(t) != 'e') {
+		if (mdea_input_get(t->in) != 'r'
+				|| mdea_input_get(t->in) != 'u'
+				|| mdea_input_get(t->in) != 'e') {
 			mdea_error(error, "Expected true");
 			return -1;
 		}
 		tok->type = MDEA_TOK_TRUE;
 		return 0;
 	} else if (c == 'f') {
-		if (next_char(t) != 'a' || next_char(t) != 'l'
-				|| next_char(t) != 's' || next_char(t) != 'e') {
+		if (mdea_input_get(t->in) != 'a'
+				|| mdea_input_get(t->in) != 'l'
+				|| mdea_input_get(t->in) != 's'
+				|| mdea_input_get(t->in) != 'e') {
 			mdea_error(error, "Expected false");
 			return -1;
 		}
@@ -138,11 +129,11 @@ int mdea_file_parser_next(void *p, struct mdea_token *tok, char **error)
 	}
 }
 
-int mdea_file_parser_parse(void *p, struct mdea_emitter *e, char **error)
+int mdea_json_parser_parse(void *p, struct mdea_emitter *e, char **error)
 {
-	struct mdea_file_parser *t = p;
+	struct mdea_json_parser *t = p;
 	struct mdea_token tok;
-	while (mdea_file_parser_next(t, &tok, error) == 0) {
+	while (mdea_json_parser_next(t, &tok, error) == 0) {
 		if (tok.type == MDEA_TOK_END)
 			return 0;
 		if (mdea_emitter_emit(e, tok, error) != 0)
@@ -151,17 +142,16 @@ int mdea_file_parser_parse(void *p, struct mdea_emitter *e, char **error)
 	return -1;
 }
 
-const struct mdea_parser_type mdea_file_parser_type = {
-	mdea_file_parser_destroy,
-	mdea_file_parser_parse,
+const struct mdea_parser_type mdea_json_parser_type = {
+	mdea_json_parser_destroy,
+	mdea_json_parser_parse,
 };
 
-struct mdea_parser *mdea_file_parser(int fd)
+struct mdea_parser *mdea_json_parser(struct mdea_input *in)
 {
-	struct mdea_file_parser *t = calloc(1, sizeof(*t));
-	t->type = &mdea_file_parser_type;
-	t->fd = fd;
-	t->c = -1;
+	struct mdea_json_parser *t = calloc(1, sizeof(*t));
+	t->type = &mdea_json_parser_type;
+	t->in = in;
 	t->alloc = 0;
 	t->size = 0;
 	t->buf = NULL;

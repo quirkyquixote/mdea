@@ -11,13 +11,14 @@ objs += boolean_node.o
 objs += array_node.o
 objs += object_node.o
 objs += token.o
-objs += file_parser.o
-objs += string_parser.o
+objs += json_parser.o
 objs += node_parser.o
 objs += emitter.o
 objs += file_emitter.o
 objs += string_emitter.o
 objs += node_emitter.o
+objs += string_input.o
+objs += file_input.o
 objs += mdea.o
 
 deps = $(objs:.o=.d)

@@ -17,7 +17,8 @@ int main(int argc, char *argv[])
 	} while (len == alloc);
 
 	buf2 = malloc(alloc);
-	struct mdea_parser *t = mdea_string_parser(buf);
+	struct mdea_input *i = mdea_string_input(buf);
+	struct mdea_parser *t = mdea_json_parser(i);
 	struct mdea_emitter *e = mdea_string_emitter(&buf2, &alloc);
 	if (mdea_parse(t, e, &error) != 0)
 		fprintf(stderr, "ERROR: %s\n", error);
@@ -25,5 +26,6 @@ int main(int argc, char *argv[])
 		write(STDOUT_FILENO, buf2, strlen(buf2));
 	mdea_parser_destroy(t);
 	mdea_emitter_destroy(e);
+	mdea_input_destroy(i);
 }
 
