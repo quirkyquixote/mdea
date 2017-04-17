@@ -14,7 +14,7 @@
 char *mdea_escape(const char *str, char **error)
 {
 	size_t size = 0;
-	char *buf = calloc(strlen(str), 1);
+	char *buf = calloc(strlen(str) + 1, 1);
 	int val;
 	for (;;) {
 		if (*str != '\\') {
