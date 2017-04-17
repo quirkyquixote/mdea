@@ -5,6 +5,7 @@
 
 #include "input.h"
 
+/* Create file input */
 struct mdea_input *mdea_file_input(int desc);
 
 #endif           // MDEA_FILE_INPUT_H_

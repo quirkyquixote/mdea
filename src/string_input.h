@@ -5,6 +5,7 @@
 
 #include "input.h"
 
+/* Create string input */
 struct mdea_input *mdea_string_input(const char *str);
 
 #endif           // MDEA_STRING_INPUT_H_

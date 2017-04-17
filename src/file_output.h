@@ -5,6 +5,7 @@
 
 #include "output.h"
 
+/* Create file output */
 struct mdea_output *mdea_file_output(int desc);
 
 #endif           // MDEA_FILE_OUTPUT_H_

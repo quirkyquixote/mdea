@@ -5,6 +5,7 @@
 
 #include "output.h"
 
+/* Create string output */
 struct mdea_output *mdea_string_output(char **buf, size_t *len);
 
 #endif           // MDEA_STROUTG_INPUT_H_
